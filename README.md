@@ -1,28 +1,53 @@
 # my-ppt-master 个性化配置与品牌模板库
 
-这是专门用于搭配 `ppt-master` 使用的**轻量级个性化定制扩展包**（总大小只有 20 多 KB）。
-
-## 包含内容
-- **`google-teaching/`**：Google 教学与研讨风专属模板、四色设计规范与矢量 SVG 图标
-- **`CUSTOM_STYLE_SPEC.md`**：自定义排版、网格体系与字阶样式规范
-- **`apply.bat` / `apply.py`**：一键注入脚本，自动将个性化模板与配置安装到任意电脑的 `ppt-master` 中
-- **`sync_to_github.bat`**：一键提取并备份脚本，当你修改或新增了新模板后，双击即可一键同步备份到 GitHub
+> 专用于搭配 `ppt-master` 的极简轻量级（~22KB）插件式个性化定制扩展包。  
+> 保持与原作者代码彻底解耦，永不冲突，支持跨电脑一键秒级同步与网盘备份。
 
 ---
 
-## 在新电脑上使用方法
+## 一、项目架构与包含内容
 
-### 方式 1：Git 极速同步（秒级完成）
-1. 在新电脑上克隆原作者的 `ppt-master`：
-   ```bash
-   git clone https://atomgit.com/hugohe3/ppt-master.git
-   ```
-2. 克隆本配置仓库（只有 20 KB，秒下）：
-   ```bash
-   git clone https://github.com/SuperRui0122/my-ppt-master.git
-   ```
-3. 双击运行 `my-ppt-master` 文件夹里的 **`apply.bat`**，立即完成注入！
+推荐的本地协同工作目录结构如下：
 
-### 方式 2：网盘备份同步（夸克网盘 / 百度网盘 / 微信）
-1. 直接把整个 `my-ppt-master` 文件夹（不到 25KB）上传到夸克网盘；
-2. 在新电脑上下载该文件夹，双击运行 **`apply.bat`** 即可自动注入。
+```text
+d:\南开\PPT-master\
+├── ppt-master\       <- 原作者的原版完整仓库（可随时直接 git pull 享受原作者最新更新）
+└── my-ppt-master\    <- 您的专属配置仓库（仅 22KB，推拉秒级完成）
+```
+
+### 仓库内核心资产清单：
+- **`google-teaching/`**：Google 教学与研讨风专属四色设计规范与矢量 SVG Logo
+- **`CUSTOM_STYLE_SPEC.md`**：自定义排版、字阶规范与网格版式体系
+- **`apply.bat` / `apply.py`（一键注入工具）**：无论在哪台新电脑上，只要双击运行，就会自动把您的个性化模板安全挂载到 `ppt-master` 中
+- **`sync_to_github.bat` / `sync_from_ppt_master.py`（一键备份工具）**：未来如果您在 `ppt-master` 中调整了配置或增加了新模板，双击它就会自动提取最新修改并推送到您的 GitHub！
+
+---
+
+## 二、在新电脑上的完整使用姿势（闭环极简流程）
+
+### 步骤 1：新电脑下载原作者代码（秒级）
+原作者国内 AtomGit 镜像速度极快：
+```bash
+git clone https://atomgit.com/hugohe3/ppt-master.git
+```
+
+### 步骤 2：获取您的个性化配置（二选一）
+- **方式 A（Git 方式，推荐）**：
+  ```bash
+  git clone https://github.com/SuperRui0122/my-ppt-master.git
+  ```
+- **方式 B（网盘方式）**：  
+  从夸克网盘、百度网盘或微信把下载的 `my-ppt-master` 文件夹解压到 `ppt-master` 同级目录。
+
+### 步骤 3：一键生效
+直接双击运行 `my-ppt-master` 里的 **`apply.bat`**！  
+所有 Google 教学规范、品牌模板与规则引用将自动注入完成，且**以后原作者无论怎么更新代码，都不会冲突或冲掉您的定制**！
+
+---
+
+## 三、日常调整与修改同步
+
+若后续在 `ppt-master` 中继续打磨了模板或增加了新设计规范：
+1. 双击 `my-ppt-master/sync_to_github.bat`；
+2. 脚本将自动抽取最新文件、提交并推送到 GitHub 远端；
+3. 如果使用网盘，直接将 `my-ppt-master` 文件夹随手扔进网盘覆盖备份即可。
