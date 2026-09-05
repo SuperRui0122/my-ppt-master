@@ -45,19 +45,14 @@ The four primary brand colors (Blue / Green / Yellow / Red) carry equal weight i
 > - Page-header two-line system: section label 25.33px (19pt) bold; page title 32px (24pt) bold.
 > - Role anchors: body 24, title 32, subtitle 32, annotation 18, code 22, footnote 16.
 
-## IV. Logo
+## IV. Logo（严禁使用谷歌徽标规则）
 
-Google uses a dual-lockup brand system — pick by context, never combine on the same page.
+> **用户强制规则（2026-09-05 确认）**：
+> 在所有生成的教学课件（包括封面、封底、内容页、小节过渡页等所有页面）中，**严禁放置任何谷歌品牌图标**（包括 `google_wordmark.svg` 和 `google_g_logo.svg`）。保持页面纯净规整的现代学术教学风格，严禁出现商业品牌 Logo。
 
-| File | Form | Usage |
-|---|---|---|
-| `../images/google_wordmark.svg` | Full "Google" wordmark (272×92) | Cover hero, ending sign-off, any moment the full brand reads at a glance |
-| `../images/google_g_logo.svg` | Square multi-color "G" mark (24×24) | Header / footer corners, page-number neighbors, tight badges, any small-size moment where the wordmark would become illegible |
+- 封面：仅保留课程标题、副标题与装饰色条，严禁放置 `google_wordmark.svg`。
+- 内容页：右上角保持留白（禁止放置 `google_g_logo.svg`）。
 
-- Cover: prefer wordmark
-- Per-page: optional — only when wordmark or G mark genuinely fits the layout; do not stamp every page
-- Use only unmodified approved artwork and follow the official guidance for the actual context; never imply affiliation, sponsorship, or endorsement
-- Clearspace: follow the applicable official asset guidance; never crowd the logo or place it on a busy background
 
 ## V. Voice & Tone
 
@@ -95,7 +90,7 @@ User-confirmed header pattern (2026-08-03) for every content page（正文内容
   - Line 1 — section label（章节标签）: 25.33px (19pt) bold `#4285F4`（Google 蓝）
   - Line 2 — page title（页面标题）: 32px (24pt) bold `#202124`（深色）
   - 两行比例约 1.26:1；标签行在上（约 y=58）、标题行在下（约 y=96），页眉组 bounds 约 `40 28 1120 96`
-- **Top-right Google G mark**（页眉右上角）: `google_g_logo.svg` 24×24 at `x=1216 y=36`, one per content page.
+- **Top-right area**（页眉右上角）: 保持纯净留白（**严禁使用任何谷歌品牌图标**，禁止放置 `google_g_logo.svg`），维持干净现代的教学幻灯片版式。
 - **Page top accent bar**: 1280×6 `#4285F4` 细条在页面最顶部（封面/结尾页用四色分段 14px 条）。
 - **Footer area**（页脚）: 页码 + 章节名，16px `#9AA0A6`；`第三章 · 章节名` 居左、页码 `NN` 居右（`x=1240 text-anchor=end`），组 bounds 约 `40 660 1200 40`。
 - **Section pages** use §VII instead; cover/ending pages are exempt from this header.
