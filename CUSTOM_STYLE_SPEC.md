@@ -141,9 +141,9 @@
 
 | 章节 | 工程目录名 | 说明 |
 | :--- | :--- | :--- |
-| **第 1 章** | `projects/crawler-ch1_ppt169_20260802` | 基础环境搭建与 requests 初探 |
-| **第 2 章** | `projects/crawler-ch2_ppt169_20260803` | 数据解析（BeautifulSoup / XPath），**课件审美风格发源版** |
-| **第 3 章** | `projects/crawler-ch3_ppt169_20260804` | 静态网页采集实战（豆瓣 Top250） |
-| **第 4 章** | `projects/crawler-ch4_ppt169_20260806` | 动态网页与逆向分析 |
-| **第 5 章** | `projects/crawler-ch5_ppt169_20260807` | 数据存储与高效处理（42页纯代码与表格） |
-| **第 6 章** | `projects/crawler-ch6_ppt169_20260807` | 验证码识别与高级反爬对抗 |
+| **第 1 章** | `projects/python项目/crawler-ch1_ppt169_20260802` | 基础环境搭建与 requests 初探 |
+| **第 2 章** | `projects/python项目/crawler-ch2_ppt169_20260803` | 数据解析（BeautifulSoup / XPath），**课件审美风格发源版** |
+| **第 3 章** | `projects/python项目/crawler-ch3_ppt169_20260804` | 静态网页采集实战（豆瓣 Top250） |
+| **第 4 章** | `projects/python项目/crawler-ch4_ppt169_20260806` | 动态网页与逆向分析 |
+| **第 5 章** | `projects/python项目/crawler-ch5_ppt169_20260807` | 数据存储与高效处理（42页纯代码与表格） |
+| **第 6 章** | `projects/python项目/crawler-ch6_ppt169_20260807` | 验证码识别与高级反爬对抗 |
