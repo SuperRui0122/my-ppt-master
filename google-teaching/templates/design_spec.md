@@ -94,3 +94,23 @@ User-confirmed header pattern (2026-08-03) for every content page（正文内容
 - **Page top accent bar**: 1280×6 `#4285F4` 细条在页面最顶部（封面/结尾页用四色分段 14px 条）。
 - **Footer area**（页脚）: 页码 + 章节名，16px `#9AA0A6`；`第三章 · 章节名` 居左、页码 `NN` 居右（`x=1240 text-anchor=end`），组 bounds 约 `40 660 1200 40`。
 - **Section pages** use §VII instead; cover/ending pages are exempt from this header.
+
+## IX. Quiz & Practice Interaction Pattern（随堂测验/习题交互与动效规范）
+
+User-confirmed quiz/exercise interaction pattern (2026-09-05) for all quiz and practice slides in teaching decks:
+
+- **Strictly forbid revealing answers initially（严禁提前泄露答案，强制教学红线）**:
+  - 测验/客观题/练习题页面进入时，**一律严禁在初始状态直接标出正确答案或展示答案解析**；
+  - 必须保证课堂练习与互动的真实意义，留出独立思考时间。
+- **Initial Neutral State（初始中性显示）**:
+  - 题干及所有选项卡片（A、B、C、D）统一采用中性浅灰色呈现（`#F1F3F4` 底色、`#DADCE0` 边框、`#202124` 深色文字，常规字重）；
+  - 正确选项不得有任何颜色高亮或字体加粗区别；
+  - 底部的答案与解析提示条（`ans_bar`）**默认完全隐藏**。
+- **On-Click Reveal Animation（点击分步揭晓动效）**:
+  - 必须使用 PowerPoint 原生淡入动画（`entrance_fade`，时长 0.25s）：
+    - **第 1 次点击（Click 1 · 揭晓第 1 题）**：第 1 题正确选项平滑淡入转为绿色高亮卡片（`#E6F4EA` 浅绿底、`#34A853` 绿色边框与加粗绿字），同时底部的答案与详细解析条伴随淡入（`with-previous`）；
+    - **第 2 次点击（Click 2 · 揭晓第 2 题）**：多题页面第 2 次点击再揭晓第 2 题的高亮与解析条；
+    - **再次点击**：平滑切入下一张幻灯片。
+- **OOXML Timing（底层实现标准）**:
+  - 通过标准 OpenXML `<p:timing>` 序列节点，为正确选项高亮层与解析条绑定 `on-click` + `with-previous` 级联时序，原生支持 PowerPoint 与 WPS 放映模式。
+

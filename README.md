@@ -16,10 +16,12 @@ d:\南开\PPT-master\
 ```
 
 ### 仓库内核心资产清单：
+- **`SKILL.md`**：个性化教学设计 Skill 规约，包含无谷歌徽标、单页大图及随堂测验分步点击动画红线
 - **`google-teaching/`**：Google 教学与研讨风专属四色设计规范与矢量 SVG Logo
-- **`CUSTOM_STYLE_SPEC.md`**：自定义排版、字阶规范与网格版式体系
+- **`CUSTOM_STYLE_SPEC.md`**：自定义排版、字阶规范、网格版式体系与测验互动动效细则
 - **`apply.bat` / `apply.py`（一键注入工具）**：无论在哪台新电脑上，只要双击运行，就会自动把您的个性化模板安全挂载到 `ppt-master` 中
 - **`sync_to_github.bat` / `sync_from_ppt_master.py`（一键备份工具）**：未来如果您在 `ppt-master` 中调整了配置或增加了新模板，双击它就会自动提取最新修改并推送到您的 GitHub！
+
 
 ---
 
