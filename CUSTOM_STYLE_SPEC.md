@@ -48,6 +48,10 @@
 
 ### 3. 章节过渡页固定版式（Section Page - 继承第 2 章 P05 样式）
 
+> [!IMPORTANT]
+> **【强制触发门禁（Hard Gate）】**  
+> 只要 PPT 结构包含 2 个及以上的宏观“部分（Part）”、“大模块”或“小节/主章节（Chapter/Section）”，在进入具体正文内容前，**必须强制规划并生成 1 页独立的章节过渡页（Section Opener / Transition Slide）**！严禁在目录页后直接切入正文，严禁仅依靠正文页眉小字充当转场。
+
 所有的章节标题/小节过渡页（Section Opener），一律采用以下版式规范：
 
 * **画布结构**：
