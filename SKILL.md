@@ -4,9 +4,9 @@ description: >
   Custom brand presets, teaching presentation design specifications, and interactive animation rules
   for PPT Master. Defines the Google-Teaching style (Microsoft YaHei, two-line header system,
   P05 section divider page, 4-color rotation, strictly forbidden Google logos, single-image-per-slide policy,
-  and native step-by-step interactive quiz reveal animations).
+  native step-by-step interactive quiz reveal animations, and no-animation lecture mode with 2-page split quizzes).
 metadata:
-  version: "1.1.0"
+  version: "1.2.0"
   author: "SuperRui0122"
   repository: "https://github.com/SuperRui0122/my-ppt-master"
 ---
@@ -85,6 +85,26 @@ metadata:
   - **大数字下方两级标题**：部分主标题（`22~24pt` 加粗 `#202124`）+ 部分核心目标/副标题（`13~14pt` `#5F6368`）；
   - **右侧任务/要点卡片组**：纵向排列 2~3 个核心课题卡片，带圆角或圆形主色打勾图标，第一行加粗要点标题（`15~16pt` `#202124`），第二行详细描述（`11~12pt` `#5F6368`）；
   - **底部核心导引栏**：`bulb` 灵感灯泡图标 + 加粗单行核心导引提示语（`12~13pt` 加粗主色）。
+
+### 6. 无动画纯静态讲课版与两页式交互拆分规范（No-Animation Lecture & 2-Page Split Specification）
+- **规范背景与触发场景**：
+  - 高校教学管理、成人开放教育考核或特定备课检查平台通常要求教师提交“无动画纯静态版本”课件，或要求直接转为 PDF 格式进行投屏授课；
+  - 纯静态模式下若简单剔除动画，将导致习题的正确答案与深度解析在切页瞬间“一览无余”，丧失随堂测试与启发式提问的教学价值；若简单隐藏答案，则课件失去题解内容。
+- **两页式交互拆分机制（Two-Page Interactive Split）**：
+  - 凡是带有点击揭晓答案/解析的互动习题、随堂测验或分步揭晓页面，在无动画讲课模式下**必须严格拆解为前后连续的两页**：
+    - **第 A 页（提问与思考页 · Question State）**：
+      - 完整保留题目题号徽章、题干内容及全部中性选项（A/B/C/D）；
+      - **彻底物理移除**所有正确选项的高亮层（浅绿底/绿框）以及底部的答案与解析卡片（`ans_bar`），页面干净中立，无任何答案痕迹；
+      - 专门供教师课堂投屏提问、引导学员独立审题与现场作答思考。
+    - **第 B 页（揭晓与讲评页 · Answer State）**：
+      - 完整保留题干及选项；
+      - 正确选项覆盖渲染为绿色高亮卡片（浅绿底 `#E6F4EA`、深绿边框 `#34A853`、加粗绿字）；
+      - 底部完整呈现答案解析栏（`ans_bar`），供教师讲评剖析题目知识点与避坑要点。
+- **全局 0 动画净化门禁（Zero Animation Timing Purge）**：
+  - 在生成或转换为静态讲课版时，必须彻底清理幻灯片 XML 结构中的所有 `<p:timing>` 动画节点，确保 `p:cTn` 动效序列树完全清空；
+  - 杜绝在不同演示软件（PowerPoint / WPS / 极速 Office）或 PDF 导出时出现不可控的图层错位或闪烁问题。
+- **页脚页码全局连续重排（Sequential Footer Renumbering）**：
+  - 页面拆分导致演示文稿总页数增加，必须全局重新遍历所有幻灯片，自适应更新右下角页脚页码格式（如 `NN / Total`，例：`45 / 90`），保证全课件页码绝对连续、无断号、总页数精准一致。
 
 ---
 
