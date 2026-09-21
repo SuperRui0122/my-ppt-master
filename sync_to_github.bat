@@ -8,11 +8,11 @@ if %errorlevel% neq 0 (
     exit /b
 )
 
-echo [2/2] 正在推送到 GitHub (SuperRui0122/my-ppt-master)...
+echo [2/2] 正在双线推送到 Gitee 与 GitHub...
 cd /d "%~dp0"
 git add .
 git commit -m "update: sync personalized configurations"
 git push origin main
 echo.
-echo [完成] 最新个性化配置已成功同步推送到 GitHub！
+echo [完成] 最新个性化配置已成功双线同步推送到 Gitee 与 GitHub！
 pause
