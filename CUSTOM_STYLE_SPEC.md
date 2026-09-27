@@ -170,8 +170,30 @@ Git 会告诉你冲突。教案是纯文本 Markdown，**可以手工合并**—
 |---|---|---|
 | `apply.bat` | 新电脑首次 / 重装 | 挂载定制配置 |
 | `update.bat` | 拉上游更新时 | pull + 自动重装（**永不冲突**） |
-| `push.bat` | 收工时 | 提交并推送到所有远端（Gitee + GitHub） |
+| `push.bat` | 收工时 | 提交并推送到 Gitee |
 | `uninstall.bat` | 想还原上游时 | 干净卸载 |
+
+### 4.6 远端与备份策略：只用 Gitee
+
+**2026-09-27 决定：本仓库只保留 Gitee 一个远端，放弃 GitHub 镜像。**
+
+原因：GitHub 在国内需要代理，实测频繁出现 `CONNECT tunnel failed, response 502`，每次推送都失败。维护成本高于它带来的价值。
+
+代价是失去「海外异地备份」这一层。补偿方式是**离线备份**——两台电脑本身就是天然两份，再定期导出一个单文件备份，丢到移动硬盘或网盘：
+
+```bash
+git bundle create my-ppt-master.bundle --all
+```
+
+恢复时：
+
+```bash
+git clone my-ppt-master.bundle my-ppt-master
+```
+
+`.bundle` 是单个文件、含完整 Git 历史、不含工作区产物，非常适合冷备。建议每次做完一个章节导出一次，文件名带上日期，例如 `my-ppt-master-2026-09-27.bundle`。
+
+> 上游 `ppt-master` 的官方仓库仍在 GitHub（`hugohe3/ppt-master`），国内建议用 AtomGit 镜像 `https://atomgit.com/hugohe3/ppt-master.git`。那是上游的归属信息，与本仓库的远端策略无关，不要删。
 
 ---
 
@@ -312,11 +334,11 @@ v1.x 的 `SKILL.md` 与 `CUSTOM_STYLE_SPEC.md` 有约 90% 内容重复，且已�
 
 **v2.0 修法**：`SKILL.md` 成为规则**唯一权威源**；本文件改为只讲安装与协作，不再复制规则正文。
 
-### 缺陷 4：`sync_to_github.bat` 名不副实
+### 缺陷 4：推送脚本名不副实
 
-脚本 echo 输出「已成功双线同步推送到 Gitee 与 GitHub」，但实际只执行了 `git push origin main`，而当时 `origin` 只指向 Gitee。
+`sync_to_github.bat` 的 echo 输出「已成功双线同步推送到 Gitee 与 GitHub」，但实际只执行了 `git push origin main`，而当时 `origin` 只指向 Gitee。你以为有异地备份，其实没有。
 
-**v2.0 修法**：`push.bat` 会检查并推送到**所有已配置的远端**，并如实报告推了哪几个。
+**v2.0 修法**：`push.bat` 会检查并推送到**所有已配置的远端**，并如实报告推了哪几个。`sync_to_github.bat` 已删除；2026-09-27 进一步决定只保留 Gitee 一个远端，见 §4.6。
 
 ---
 

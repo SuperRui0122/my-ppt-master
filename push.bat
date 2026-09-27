@@ -2,7 +2,7 @@
 chcp 65001 >nul
 cd /d "%~dp0"
 echo.
-echo  [my-ppt-master] 正在提交并推送到所有远端（Gitee + GitHub）...
+echo  [my-ppt-master] 正在提交并推送到 Gitee...
 echo.
 python "%~dp0push.py" %*
 set RC=%errorlevel%

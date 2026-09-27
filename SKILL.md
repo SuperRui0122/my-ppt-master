@@ -12,7 +12,7 @@ description: >
 metadata:
   version: "2.0.0"
   author: "SuperRui0122"
-  repository: "https://github.com/SuperRui0122/my-ppt-master"
+  repository: "https://gitee.com/wang-changani/my-ppt-master"
   upstream: "https://github.com/hugohe3/ppt-master (MIT, Copyright (c) 2025-2026 Hugo He)"
 ---
 

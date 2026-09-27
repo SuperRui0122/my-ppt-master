@@ -2,19 +2,21 @@
 """
 my-ppt-master 推送器  (v2.0.0)
 
-把本仓库的改动提交，并推送到所有已配置的远端（Gitee + GitHub）。
+把本仓库的改动提交，并推送到所有已配置的远端。
 
 用法:
   python push.py                       # 自动生成提交信息
   python push.py -m "补充第3章样式"     # 自定义提交信息
   python push.py --dry-run             # 只显示将要做什么，不推送
-  python push.py --remote gitee        # 只推指定远端
+  python push.py --remote origin       # 只推指定远端
 
-如果还没有配置 GitHub 远端，本脚本会提示你执行：
+本仓库只使用 Gitee 一个远端。若还没配置，本脚本会提示你执行：
 
-    git remote add github https://github.com/SuperRui0122/my-ppt-master.git
+    git remote add origin https://gitee.com/wang-changani/my-ppt-master.git
 
-（Gitee 是主仓，GitHub 是镜像。两个都推，任何一边挂掉都不影响你取回代码。）
+（2026-09-27 起放弃 GitHub 镜像：国内直连 Gitee 稳定，GitHub 需代理且频繁失败，
+每次推送都报错，维护成本高于它带来的异地备份价值。异地备份改用离线 .bundle 文件，
+见 CUSTOM_STYLE_SPEC.md §4.6。）
 """
 
 from __future__ import annotations
@@ -28,10 +30,9 @@ from pathlib import Path
 VERSION = "2.0.0"
 HERE = Path(__file__).resolve().parent
 
-# 建议配置的远端（只用于提示，不强制）
+# 建议配置的远端（只用于提示，不强制）。只保留 Gitee，理由见 CUSTOM_STYLE_SPEC.md §4.6。
 SUGGESTED_REMOTES = {
     "origin": "https://gitee.com/wang-changani/my-ppt-master.git",
-    "github": "https://github.com/SuperRui0122/my-ppt-master.git",
 }
 
 

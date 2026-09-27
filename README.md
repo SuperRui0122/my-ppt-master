@@ -33,9 +33,11 @@ pip install pyyaml
 | 按钮 | 什么时候按 |
 |---|---|
 | **`update.bat`** | 想跟上上游 ppt-master 的新版本时 |
-| **`push.bat`** | 收工时（提交并推送到 Gitee + GitHub） |
+| **`push.bat`** | 收工时（提交并推送到 Gitee） |
 
 > ⚠️ **`update.bat` 不能省。** 直接 `git pull` 会把本仓库注入的规约指针冲掉，AI 就再也读不到你的教学规约了。`update.bat` 会 pull 完自动装回去，且永不冲突。
+
+> 📦 **只推 Gitee。** 2026-09-27 起放弃 GitHub 镜像——国内直连 Gitee 稳定，GitHub 需代理且实测频繁报 502。异地备份改用离线 `.bundle` 文件，见 [`CUSTOM_STYLE_SPEC.md`](./CUSTOM_STYLE_SPEC.md) §4.6。
 
 ---
 
@@ -52,7 +54,6 @@ pip install pyyaml
 | `push.py` / `push.bat` | 推送器：提交并推送到所有远端 |
 | `uninstall.py` / `uninstall.bat` | 卸载器：把上游还原干净 |
 | `sync_from_ppt_master.py` | 回流工具：把在 ppt-master 里现场调好的品牌模板取回本仓库 |
-| `sync_to_github.bat` | 兼容保留，转发到 `push.bat` |
 
 ### 安装器改了上游哪些文件？
 
@@ -93,7 +94,7 @@ python apply.py --ppt-master D:\path\to\ppt-master   # 手动指定上游位置
 | 向 `AGENTS.md` / `CLAUDE.md` 追加写 | `git pull` 必然冲突 | 改为注入上游 `SKILL.md` 标记块 + `update.bat` 还原 |
 | 品牌模板标题带中文括号 `## IV. Logo（…）` | 上游校验器直接拒绝，装不进去 | 标题改纯净，说明移到引用块 |
 | 两份规范 90% 重复且已漂移 | 页脚/页码/字号四处分叉；一处还写着「放置 google logo」与红线自相矛盾 | `SKILL.md` 成为唯一权威源 |
-| `sync_to_github.bat` 只推 Gitee 却声称双线 | 以为有 GitHub 备份，其实没有 | `push.py` 如实报告推了哪几个远端 |
+| 推送脚本谎报远端（只推一个却说推了两个） | 以为有异地备份，其实没有 | `push.py` 如实报告推了哪几个远端；`sync_to_github.bat` 已删除 |
 
 ---
 
