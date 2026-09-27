@@ -78,21 +78,28 @@ User-confirmed section/divider page pattern (2026-08-04) for every section opene
   - 03 黄：field `#FEF7E0` · bar `#FBBC05` · number/icon `#F9AB00`
   - 04 红：field `#FCE8E6` · bar/number/icon `#EA4335`
 - **Big number**: 200px bold solid brand color（`section_number` 锚点），top-left inside the tinted field (`x=100 y=380`, bounds `80 180 320 260`).
-- **Title block**（浅色块内、数字下方）: section title 32px bold `#202124`; subtitle 24px `#5F6368`, keep it short（≤约 16 字）.
+- **Title block**（浅色块内、数字下方，教案长标题上下分流法则）:
+  - 当源教案小节标题含破折号 `——`、修辞比喻或排比长句时，严禁整句照搬进主标题导致折行；
+  - Section title: 32px bold `#202124`，仅提纯核心技术实体，**严格 ≤ 8~10 字**（确保左栏 520px 内单行呈现，如 `一维数组与底层机制`）；
+  - Subtitle: 20~24px `#5F6368`，用于消化修辞比喻或范围说明，**严格 ≤ 16 字**（如 `连续内存模型、寻址公式与 AI 协同实战`）.
 - **Task cards**（右侧）: white rounded cards `600×96` rx=16, one per 子任务; 40px brand-color icon + 24px bold task name `#202124` + 18px `#5F6368` description. Keep task titles short enough to fit the 600px card.
 - **Footer note**（右下）: bulb icon 36px brand color + 20px `#202124` one-line takeaway, kept short（≤约 20 字）.
 
-## VIII. Content Page Header（内容页页眉版式）
+## VIII. Content Page Header（内容页页眉版式 — B1 双轨面包屑 + `X.Y.N` 极简主标题体系）
 
-User-confirmed header pattern (2026-08-03) for every content page（正文内容页）in teaching decks. Top-left two-line title system, kept identical across all content pages.
+User-confirmed B1 header pattern (updated 2026-09-27) for every content page（正文内容页）in teaching decks. Top-left two-line title system with strict separation of responsibilities and zero em-dashes (`——`).
 
-- **Top-left two-line title system**（左上角两行标题体系）:
-  - Line 1 — section label（章节标签）: 25.33px (19pt) bold `#4285F4`（Google 蓝）
-  - Line 2 — page title（页面标题）: 32px (24pt) bold `#202124`（深色）
+- **Top-left two-line title system**（左上角 B1 双轨标题体系）:
+  - **Line 1 — section & topic breadcrumb（上行面包屑导航）**: 25.33px (19pt) bold 课节主题色（如 `#4285F4`）
+    - 固定格式：**`第X节 · 小节简称  ▸  X.Y 专题简称`**（如 `第三节 · 一维数组  ▸  3.1 检索效率导论`）
+    - 脱水红线：严禁照搬教案破折号长标题或修辞比喻；**小节简称 ≤ 8 字**，**专题简称 ≤ 6 字**，严禁含 `——`。
+  - **Line 2 — page title（下行页面主标题 · 款式 B1）**: 32px (24pt) bold `#202124`（深色）
+    - 固定格式：**`X.Y.N 本页核心标题`**（如 `3.1.3 千万级数据检索效率对比`、`2.4.1 SHOW DATABASES 查库语法`）
+    - 字数红线：**核心标题严格 ≤ 12 字**（含 `X.Y.N ` 前缀总长 ≤ 18 字符），严禁出现破折号 `——` 或 `专题名N——` 复读前缀，严禁堆砌超过 2 个抽象尾缀词。
   - 两行比例约 1.26:1；标签行在上（约 y=58）、标题行在下（约 y=96），页眉组 bounds 约 `40 28 1120 96`
 - **Top-right area**（页眉右上角）: 保持纯净留白（**严禁使用任何谷歌品牌图标**，禁止放置 `google_g_logo.svg`），维持干净现代的教学幻灯片版式。
 - **Page top accent bar**: 1280×6 `#4285F4` 细条在页面最顶部（封面/结尾页用四色分段 14px 条）。
-- **Footer area**（页脚）: 页码 + 章节名，16px `#9AA0A6`；`第三章 · 章节名` 居左、页码 `NN` 居右（`x=1240 text-anchor=end`），组 bounds 约 `40 660 1200 40`。
+- **Footer area**（页脚）: 页码 + 章节名，16px `#9AA0A6`；`《课程名称》·第X节` 居左、页码 `NN / Total` 居右（`x=1240 text-anchor=end`），组 bounds 约 `40 660 1200 40`。
 - **Section pages** use §VII instead; cover/ending pages are exempt from this header.
 
 ## IX. Quiz & Practice Interaction Pattern（随堂测验/习题交互与动效规范）
