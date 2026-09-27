@@ -54,6 +54,7 @@ pip install pyyaml
 | `push.py` / `push.bat` | 推送器：提交并推送到所有远端 |
 | `uninstall.py` / `uninstall.bat` | 卸载器：把上游还原干净 |
 | `sync_from_ppt_master.py` | 回流工具：把在 ppt-master 里现场调好的品牌模板取回本仓库 |
+| `build_preview.py` / `preview.bat` | **翻页预览器**：把一册逐页 SVG 打包成单文件、离线可用的 `preview.html`（键盘翻页 + 缩略图 + 讲稿对照），不再需要逐页打开 SVG |
 
 ### 安装器改了上游哪些文件？
 
@@ -82,7 +83,14 @@ python update.py --dry-run    # 预览更新流程
 python update.py --force      # 上游有手工改动时，丢弃后继续更新
 python push.py -m "补充第3章样式"
 python apply.py --ppt-master D:\path\to\ppt-master   # 手动指定上游位置
+
+python build_preview.py .                        # 在当前册目录生成翻页预览
+python build_preview.py --all                    # 为 projects 下所有册批量生成
+python build_preview.py <册目录> --open           # 生成指定册并打开浏览器
 ```
+
+> 💡 **看课件效果别再用文件管理器逐页点开 SVG。** 双击 `preview.bat`，它会为 `ppt-master/projects` 下每一册生成一个 `preview.html`（单文件、含全部图片、可直接拷给别人）。打开后用 `←` `→` 翻页、`S` 看缩略图、`N` 对着讲稿备注备课。
+> 注意：`preview.html` 是**快照**，改完 SVG 或讲稿后要重跑一次才会刷新。
 
 ---
 

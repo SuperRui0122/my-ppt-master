@@ -1,0 +1,11 @@
+# 行尾策略：只钉死真正挑行尾的文件，其余交给 core.autocrlf，避免产生虚假 diff。
+#
+# Windows 批处理必须 CRLF：LF 会让 cmd 把文件解析成乱码（实测报
+# "'----' 不是内部或外部命令" 且中文变 GBK 乱码）。
+*.bat  text eol=crlf
+*.cmd  text eol=crlf
+
+# 二进制，禁止任何行尾/编码转换
+*.png  binary
+*.jpg  binary
+*.pptx binary

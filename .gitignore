@@ -26,3 +26,6 @@ desktop.ini
 *.ppt
 *.pdf
 *.mp4
+
+# ── 预览器产物（是快照，随时可由 build_preview.py 重新生成） ──
+preview.html
