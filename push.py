@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-my-ppt-master 推送器  (v2.0.0)
+my-ppt-master 推送器  (v2.1.0)
 
 把本仓库的改动提交，并推送到所有已配置的远端。
 
@@ -27,7 +27,7 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-VERSION = "2.0.0"
+VERSION = "2.1.0"
 HERE = Path(__file__).resolve().parent
 
 # 建议配置的远端（只用于提示，不强制）。只保留 Gitee，理由见 CUSTOM_STYLE_SPEC.md §4.6。

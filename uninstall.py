@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-my-ppt-master 卸载器  (v2.0.0)
+my-ppt-master 卸载器  (v2.1.0)
 
 等价于 `python apply.py --uninstall`，单独提供一个入口方便双击 / 记忆。
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-my-ppt-master 回流工具  (v2.0.0)
+my-ppt-master 回流工具  (v2.1.0)
 
 把在 ppt-master 里现场改好的 google-teaching 品牌模板，「回流」到本仓库。
 

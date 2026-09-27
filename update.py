@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-my-ppt-master 更新器  (v2.0.0)
+my-ppt-master 更新器  (v2.1.0)
 
 把「上游 ppt-master 的更新」与「你的个性化定制」安全地叠加起来，
 让 git pull 永远不会冲突。
