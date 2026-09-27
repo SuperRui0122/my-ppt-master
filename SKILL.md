@@ -5,9 +5,10 @@ description: >
   for PPT Master. Defines the Google-Teaching style (Microsoft YaHei, two-line header system,
   P05 section divider page, 4-color rotation, strictly forbidden Google logos, single-image-per-slide policy,
   native step-by-step interactive quiz reveal animations, no-animation lecture mode with 2-page split quizzes,
-  split-page vertical anti-whitespace balance, and token-aware orphan-free text wrapping).
+  split-page vertical anti-whitespace balance, token-aware orphan-free text wrapping, and inner callout
+  anti-occlusion bi-directional auto-fit with Z-Order zero-collision gate).
 metadata:
-  version: "1.3.0"
+  version: "1.4.0"
   author: "SuperRui0122"
   repository: "https://github.com/SuperRui0122/my-ppt-master"
 ---
@@ -198,12 +199,32 @@ metadata:
 - **“下推词元”消灭 1~2 字孤行（Orphan Tail Prevention）**：
   - 当单元格或卡片段落折行后，若最后一行仅剩 `<= 2` 个可见字符（如单字“现”、“宽”、“秒？”等孤字尾行），必须**从倒数第二行末尾弹出 1 个词元（Token）下推拼接到最后一行开头**——既使倒数第二行变短（绝不越界），又使最后一行增至 3~4 个字符（彻底消灭孤字尾行），同时保持总行数不变。
 
+### 13. 父容器内嵌子框防遮挡、双向自适应行距与同级图层（Z-Order）零碰撞规范（Inner Callout Anti-Occlusion, Bi-Directional Auto-Fit & Z-Order Collision Gate）
+- **问题根源与反模式警示**：
+  - 当大范围卡片（`y = 114 ~ 662`）内部底端嵌入了小范围小结框（Callout Box，如 `y = 564 ~ 650`）时，二者在 OpenXML 中属于**同级形状（Sibling Shapes）**，且后绘制的底端小结框位于更高图层（Z-Order 靠前）。
+  - 若正文排版函数仅实现“内容少时单向拉大行距（One-way Stretch）”，而缺失“内容多时反向压缩（Bi-directional Compaction）”，或未将伪代码/Prompt 等单块长段落纳入高度上限约束，上方正文就会向下延伸至 `y = 570 ~ 665`，被底端内嵌小结框直接遮挡覆盖！
+- **四项强制工程约束**：
+  1. **双向自适应行距与段距（Bi-Directional Auto-Fit Clamping）**：
+     - 正文排版函数（`render_bullet_items` / `render_paragraph`）必须同时具备**正向伸展**与**反向压缩**双分支：
+     - 当 `natural_h < avail_h` 时，适度拉大段距与行距消除底部空洞；
+     - 当 `natural_h > avail_h`（即正文底边 `max_bot > callout_top - 18px`）时，必须按阶梯自动执行反向压缩：依次收紧条目间距 `item_gap`（`12px ➔ 3.0px`）、标题与正文间距 `hb_gap`（`4px ➔ 0.5px`）、多行行距系数（`1.35x ➔ 1.12x`）及微调字号，**强制保证上方全部文字底边 `max_bot <= callout_top - 18px`（净安全间距 `gap >= 18px`）**；
+  2. **卡片内加粗小标题单行锁死（Single-Line Bullet Heading Lock）**：
+     - 带 `▸` 的卡片小标题原则上必须保持 **1 行内显示完毕**，严禁因宽度阈值过于保守而折成“第 2 行仅剩 2~4 个字”的伪双行标题（每折一行白白浪费 `28~30px` 纵向空间，直接诱发底部文字被内嵌框遮挡）；若小标题略长，优先扩展文本框至卡片右侧内边距（`card_right - 14px`）或微缩 `0.2~0.8pt` 字号保持单行，且合并折行时必须完整保留中英文/符号间的空格；
+  3. **内嵌小结框紧凑贴底与 2 行上限（Compact Bottom Callout Placement）**：
+     - 卡片底端内嵌小结框（Callout Box）文本严格限制在 **1~2 行**，外框高度根据文本行数自适应收敛为 `h = 68 ~ 72px`，底边贴齐大卡片底边内侧 `card_bot - 12px`（即 `y = 578 ~ 582`），为上方正文释放 `15~18px` 纵向缓冲空间；
+  4. **全局同级图层（Z-Order）形状遮挡文字零容忍门禁（Zero Shape-Over-Text Occlusion Gate）**：
+     - 交付前必须运行 OpenXML 全量图层碰撞扫描：遍历每一页所有形状，凡是图层靠后（`idx2 > idx1`）的带填充色块（`solidFill` / `gradFill`，不含章节过渡页半透明背景大数字水印）与图层靠前（`idx1`）的文本框发生矩形相交（`ix > 4px` 且 `iy > 2px`），或内嵌子框与上方文字间距 `gap < 16px`，一律判定为**致命遮挡缺陷（Critical Occlusion）**，阻断交付并原位重排修复。
+
+### 14. 跨小节迁移与增删幻灯片后的三级标题全局单调重排铁律（Cross-Section Slide Relocation & Subtitle Monotonic Re-Indexing Rule）
+- **问题根源**：将幻灯片跨小节抽离或迁移（如将第 1 节的 AI 案例移入第 2 节、将检索对比移入第 3 节）时，若仅替换小节前缀（如把 `1.2 工程与AI应用3~5` 改为 `2.3 工程与AI应用3~5`，或把 `1.1 学科导论3` 改为 `3.1 学科导论3`），会导致目标小节出现**断头尾号（无 1、2 直接从 3 开始）**、**编号回跳（`2.2 -> 2.3 -> 2.2 -> 2.3`）**以及**同号异名冲突（两个不同专题共用 `2.3` 或 `3.1`）**。
+- **三项强制重排门禁**：
+  1. **二级编号 `X.Y` 全小节严格单调非递减**：同一小节内从第 1 页到最后 1 页，`X.Y` 必须严格按 `X.1 -> X.2 -> X.3 -> X.4 -> X.5` 顺序推进，**严禁回跳**，且须与章节过渡页（Divider Slide）右侧任务卡声明的模块编号 100% 一致；
+  2. **同一 `X.Y` 专题名称唯一且尾号 `N` 必从 `1` 连续递增**：每个 `X.Y 专题名N——具体子标题` 在切换至新 `X.Y` 时，尾号 `N` **必须从 `1` 开始**，后续同专题页严格按 `N = 1, 2, 3, ...` 连续加 1，严禁保留源章节残留的旧尾号（如 `3, 4, 5`）；
+  3. **自动化正则序列门禁**：交付前必须用正则 `^(\d+\.\d+)\s+([^0-9—]+?)(\d+)——(.+)$` 扫描全课件所有内容页副标题，自动校验 `X.Y` 单调性、同 `X.Y` 专题名一致性及 `N = 1..k` 连续性，确保 **0 断号、0 回跳、0 冲突**。
+
 ---
 
 ## 三、 演示者视图（Presenter View）讲稿规范
 
 - 生成课件时，必须同步提炼 100~200 字的逐页口播讲稿与上机避坑指导；
 - 通过底层 API 直接写入 PPTX 幻灯片的备注区（Notes），方便教师在放映模式下开启演示者视图随堂参考。
-
-
-
