@@ -289,6 +289,29 @@
 
 ---
 
+### 15. 代码与伪代码语法保真、物理级 4 空格阶梯缩进、单句防折行与图片 `rId` 对齐门禁（Code & Pseudocode Syntactic Fidelity, Physical 4-Space Indentation, Single-Line Lock & Image `rId` Alignment Rule）
+
+* **问题根源与三大反模式警示**：
+  1. **XML 默认空白折叠吞缩进陷阱（`xml:space="default"`）**：`svg_to_pptx.py` 默认按 XML 规范将未声明 `xml:space="preserve"` 的 `<text>` / `<tspan>` 视为 `default` 模式，会自动剥离每行开头的全部前导空格（`    ` / `        `），且 `flatten_tspan.py` 会将同 `x` 坐标的多行 `<tspan>` 合并为同一重排段落，导致 Python 的 `def`、`for`、`if` 代码块及结构化伪代码丢失全部缩进、全员左对齐贴边，学生照着 PPT 敲代码时必然触发 `IndentationError`；
+  2. **长代码句自动折行破坏行号与语法陷阱**：若对代码行调用普通多行折行函数（`wrap_line`），较长的 `print(...)` 语句会被截断成两行，导致第 2 行缺失行号且字符串字面量跨行断裂；
+  3. **增量合并 `slide*.xml` 时的图片 `rId` 错位陷阱**：PowerPoint 手动保存 `.pptx` 时会重排 `ppt/slides/_rels/slide*.xml.rels` 中的 `rId` 顺序（如将 `notesSlide` 排为 `rId2`、图片排为 `rId3`），若后续脚本增量回填 `slide*.xml` 时未与新 `.rels` 中的 `Type=".../image"` 动态对齐 `r:embed`，会导致图片引用指向 `notesSlide.xml` 而显示“无法显示图片”。
+* **五项强制工程约束与自动化门禁**：
+  1. **前导空格转物理水平坐标阶梯偏移（Physical X-Offset Indentation）**：
+     - 凡渲染 Python / C / Java / SQL 代码或带缩进的结构化伪代码时，必须统计每行前导空格数 `n_lead = len(line) - len(line.lstrip(" "))`，将前导缩进直接转化为独立 `<text>` 节点的物理水平坐标偏移：
+       $$\text{tx\_line} = \text{base\_tx} + n_{\text{lead}} \times (\text{font\_size} \times 0.58)$$
+     - 以 `Consolas 17px`（`base_tx = 104px`）为例：0 级缩进（顶格 `def`/`for`）位于 `x = 104px`，1 级缩进（4 空格 / 1 个 Tab）精确右移至 `x = 144px`（对齐 `def ` / `for ` 第 5 个字符正下方），2 级缩进（8 空格 / 2 个 Tab）精确右移至 `x = 184px`，从 OpenXML `<a:off x="..."/>` 物理坐标层面 100% 杜绝任何渲染器吞缩进；同时在 `<text>` 上显式声明 `xml:space="preserve"` 保留行内空格；
+  2. **IDE 缩进参考竖线与行内注释绿色分离（IDE Indent Guides & Inline Comment Highlighting）**：
+     - 对于 `n_lead >= 4` 的代码行，必须在每一级 4 空格缩进基准线处绘制 PyCharm / VS Code 风格的浅灰纵向对齐参考线（`<line ... stroke="#3C4043" stroke-width="1" />`），让学生在教室后排也能一眼看出需要按几次 `Tab` 键；
+     - 代码行尾的 `# 行内注释` 必须拆分为独立的绿色 `<tspan fill="#6A9955">` 文本段，使左侧待敲代码与右侧中文注释在视觉上泾渭分明；
+  3. **代码与伪代码“1 行 = 1 句”单行防折行锁死（One-Statement-Per-Line Lock）**：
+     - 代码卡片与结构化伪代码卡片中的每一逻辑行**严禁调用多行折行拆分**，必须保证 **1 个行号严格对应 1 行完整代码**；若某行含缩进后的像素宽度超出卡片右界（`avail_w = card_right - 14 - tx_line`），自动对该行以 `0.5px` 步进微缩字号（下限 `14.5px`）或精简注释词句，确保 100% 单行完整呈现；
+  4. **真实可运行 AST 语法门禁（AST Syntax & Execution Gate）**：
+     - 课件中展示的所有 Python 脚本代码（按各行物理缩进 `round((x - base_x) / space_adv)` 还原前导空格后），交付前必须通过 Python `ast.parse()` 语法树静态编译校验（**0 `SyntaxError` / 0 `IndentationError`**），确保学生照着 PPT 逐字敲入 IDE 后 100% 零语法报错直接运行，且运行输出与配套回显页逐字一致；
+  5. **增量合并幻灯片时的图片 `r:embed` 动态对齐门禁（Image Relationship `rId` Alignment Gate）**：
+     - 当脚本从用户已保存的 `.pptx` 中提取 `slide*.xml` 增量合并回新编译的 `.pptx` 时，必须解析目标包内 `ppt/slides/_rels/slide{N}.xml.rels` 中 `Type` 为 `.../relationships/image` 的真实 `Id`，将 `slide{N}.xml` 中的 `<a:blip r:embed="rId..."/>` 动态重绑为该真实图片 `rId`，并校验 `ppt/media/` 下对应图片文件存在且文件头合法，彻底杜绝“无法显示图片”。
+
+---
+
 ## 三、 专属品牌解耦架构（彻底避免 Git 冲突）
 
 
