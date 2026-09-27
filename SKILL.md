@@ -10,14 +10,21 @@ description: >
   zero-collision gate, and code/pseudocode physical 4-space indentation with AST syntax & image rId
   integrity gates).
 metadata:
-  version: "1.6.0"
+  version: "2.0.0"
   author: "SuperRui0122"
   repository: "https://github.com/SuperRui0122/my-ppt-master"
+  upstream: "https://github.com/hugohe3/ppt-master (MIT, Copyright (c) 2025-2026 Hugo He)"
 ---
 
 # My PPT Master 教学课件专属设计与动效 Skill 规约
 
 本文档为用户定制专属的教学课件制作与动效排版 Skill 规约，适用于高校与成人专科课程 PPTX 自动化生成与维护。
+
+> **本文件是教学排版规则的唯一权威源。**
+> `CUSTOM_STYLE_SPEC.md` 只讲安装与双机协作，不再复制规则正文——避免两份文件漂移后互相矛盾。
+> 本文件由 `apply.py` 通过注入指针的方式挂载进上游 `ppt-master`；上游 `git pull` 后请运行 `update.bat` 恢复挂载。
+>
+> **优先级**：本文件的规则优先于上游 `ppt-master` 的默认取值，包括 Quick 模式的提速默认行为。
 
 ---
 
@@ -56,6 +63,11 @@ metadata:
    - 课节 02 绿：主色 `#34A853` · 浅底 `#E6F4EA`
    - 课节 03 黄：主色 `#FBBC05` · 浅底 `#FEF7E0`
    - 课节 04 红：主色 `#EA4335` · 浅底 `#FCE8E6`
+6. **页脚统一格式（唯一口径，勿在别处另立标准）**：
+   - 字号 `16px` / `Pt(11)`，颜色中灰 `#9AA0A6`；
+   - **左侧**：`《课程名称》·第X节`（导览页用 `《课程名称》·课程导览`，总结页用 `《课程名称》·课程总结`）；
+   - **右侧**：页码 `NN / Total`（如 `45 / 93`），属性 `x=1240 text-anchor="end"`；
+   - 页脚组包围盒约 `40 660 1200 40`。
 
 ---
 

@@ -1,55 +1,102 @@
-# my-ppt-master 个性化配置与品牌模板库
+# my-ppt-master
 
-> 专用于搭配 `ppt-master` 的极简轻量级（~22KB）插件式个性化定制扩展包。  
-> 保持与原作者代码彻底解耦，永不冲突，支持跨电脑一键秒级同步与网盘备份。
+> 配套 [ppt-master](https://github.com/hugohe3/ppt-master)（MIT，作者 Hugo He）的**教学课件定制层**。
+> 提供无徽标教学品牌模板 `google-teaching`、15 条教学排版与动效强制规约，以及两台电脑协同备课的完整流程。
+>
+> **当前版本 v2.0.0**（2026-09-27）—— 重写安装器，修复 v1.x 的品牌注册失效与 `git pull` 冲突问题。
+> 详细安装步骤、双机协作流程、故障排查见 **[`CUSTOM_STYLE_SPEC.md`](./CUSTOM_STYLE_SPEC.md)**。
 
 ---
 
-## 一、项目架构与包含内容
+## 30 秒上手
 
-推荐的本地协同工作目录结构如下：
+### 1. 目录布局（必须是同级）
 
 ```text
-d:\南开\PPT-master\
-├── ppt-master\       <- 原作者的原版完整仓库（可随时直接 git pull 享受原作者最新更新）
-└── my-ppt-master\    <- 您的专属配置仓库（仅 22KB，推拉秒级完成）
+D:\南开\PPT-master\
+├── ppt-master\        ← 上游仓库，只 git pull，永不手工编辑
+└── my-ppt-master\     ← 本仓库，你所有的手工编辑都在这里
 ```
 
-### 仓库内核心资产清单：
-- **`SKILL.md`**：个性化教学设计 Skill 规约，包含无谷歌徽标、单页大图及随堂测验分步点击动画红线
-- **`google-teaching/`**：Google 教学与研讨风专属四色设计规范与矢量 SVG Logo
-- **`CUSTOM_STYLE_SPEC.md`**：自定义排版、字阶规范、网格版式体系与测验互动动效细则
-- **`apply.bat` / `apply.py`（一键注入工具）**：无论在哪台新电脑上，只要双击运行，就会自动把您的个性化模板安全挂载到 `ppt-master` 中
-- **`sync_to_github.bat` / `sync_from_ppt_master.py`（一键备份工具）**：未来如果您在 `ppt-master` 中调整了配置或增加了新模板，双击它就会自动提取最新修改并推送到您的 GitHub！
-
-
----
-
-## 二、在新电脑上的完整使用姿势（闭环极简流程）
-
-### 步骤 1：新电脑下载原作者代码（秒级）
-原作者国内 AtomGit 镜像速度极快：
 ```bash
 git clone https://atomgit.com/hugohe3/ppt-master.git
+git clone https://gitee.com/wang-changani/my-ppt-master.git
+pip install pyyaml
 ```
 
-### 步骤 2：获取您的个性化配置（二选一）
-- **方式 A（Git 方式，推荐）**：
-  ```bash
-  git clone https://github.com/SuperRui0122/my-ppt-master.git
-  ```
-- **方式 B（网盘方式）**：  
-  从夸克网盘、百度网盘或微信把下载的 `my-ppt-master` 文件夹解压到 `ppt-master` 同级目录。
+### 2. 双击 `apply.bat`
 
-### 步骤 3：一键生效
-直接双击运行 `my-ppt-master` 里的 **`apply.bat`**！  
-所有 Google 教学规范、品牌模板与规则引用将自动注入完成，且**以后原作者无论怎么更新代码，都不会冲突或冲掉您的定制**！
+看到 `[OK] 上游完整性门 attribution_guard.py 通过` 即安装成功。
+
+### 3. 日常只用两个按钮
+
+| 按钮 | 什么时候按 |
+|---|---|
+| **`update.bat`** | 想跟上上游 ppt-master 的新版本时 |
+| **`push.bat`** | 收工时（提交并推送到 Gitee + GitHub） |
+
+> ⚠️ **`update.bat` 不能省。** 直接 `git pull` 会把本仓库注入的规约指针冲掉，AI 就再也读不到你的教学规约了。`update.bat` 会 pull 完自动装回去，且永不冲突。
 
 ---
 
-## 三、日常调整与修改同步
+## 仓库内容
 
-若后续在 `ppt-master` 中继续打磨了模板或增加了新设计规范：
-1. 双击 `my-ppt-master/sync_to_github.bat`；
-2. 脚本将自动抽取最新文件、提交并推送到 GitHub 远端；
-3. 如果使用网盘，直接将 `my-ppt-master` 文件夹随手扔进网盘覆盖备份即可。
+| 文件 / 目录 | 作用 |
+|---|---|
+| `SKILL.md` | **规则正文**。15 条教学排版与动效强制规约（唯一权威源） |
+| `RED_LINES.md` | **最高优先级红线**。R1~R6：停在 SVG 不抢跑导出、默认走 Default、动手前声明路线、给真实预览地址、确认门不得代签、考核内容忠于源文档 |
+| `CUSTOM_STYLE_SPEC.md` | 安装步骤、双机协作流程、故障排查、历史缺陷说明 |
+| `google-teaching/` | 无徽标教学品牌模板（`templates/design_spec.md` + 矢量素材） |
+| `apply.py` / `apply.bat` | 安装器（幂等，可反复运行） |
+| `update.py` / `update.bat` | 更新器：pull 上游 + 自动重装，**永不冲突** |
+| `push.py` / `push.bat` | 推送器：提交并推送到所有远端 |
+| `uninstall.py` / `uninstall.bat` | 卸载器：把上游还原干净 |
+| `sync_from_ppt_master.py` | 回流工具：把在 ppt-master 里现场调好的品牌模板取回本仓库 |
+| `sync_to_github.bat` | 兼容保留，转发到 `push.bat` |
+
+### 安装器改了上游哪些文件？
+
+只有 3 处，其中 2 处是上游受跟踪文件（所以需要 `update.bat` 来兜底）：
+
+| # | 落点 | 受版本控制 |
+|---|---|---|
+| 1 | `skills/ppt-master/templates/brands/google-teaching/` | 否 —— 新目录，永不冲突 |
+| 2 | `skills/ppt-master/templates/brands/brands_index.json` | **是** |
+| 3 | `skills/ppt-master/SKILL.md`（注入两个标记块：红线 + 规约指针） | **是** |
+
+全部改动都带标记、可幂等重跑、可一键撤销（`uninstall.bat`）。实测卸载后 `git status` **完全为空** —— 上游逐字节还原，零删除行。
+
+> 两个标记块由 `apply.py` **统一管理**：注入时先剥离所有受管块再整体插入，所以顺序恒定、无残留。它也能自动清理早期 `ppt-master-user-rules/apply_user_rule.py` 留下的旧格式块。
+
+
+---
+
+## 常用命令
+
+```bash
+python apply.py --check       # 体检：品牌装了吗？索引注册了吗？指针在吗？
+python apply.py --dry-run     # 预览将要做的改动
+python apply.py --uninstall   # 干净卸载
+python update.py --dry-run    # 预览更新流程
+python update.py --force      # 上游有手工改动时，丢弃后继续更新
+python push.py -m "补充第3章样式"
+python apply.py --ppt-master D:\path\to\ppt-master   # 手动指定上游位置
+```
+
+---
+
+## v1.x → v2.0 修复了什么
+
+| 缺陷 | 后果 | v2.0 修法 |
+|---|---|---|
+| `brands_index.json` schema 猜错 | 品牌**从未注册成功**，AI 发现不了 | 改用上游官方 `register_template.py` |
+| 向 `AGENTS.md` / `CLAUDE.md` 追加写 | `git pull` 必然冲突 | 改为注入上游 `SKILL.md` 标记块 + `update.bat` 还原 |
+| 品牌模板标题带中文括号 `## IV. Logo（…）` | 上游校验器直接拒绝，装不进去 | 标题改纯净，说明移到引用块 |
+| 两份规范 90% 重复且已漂移 | 页脚/页码/字号四处分叉；一处还写着「放置 google logo」与红线自相矛盾 | `SKILL.md` 成为唯一权威源 |
+| `sync_to_github.bat` 只推 Gitee 却声称双线 | 以为有 GitHub 备份，其实没有 | `push.py` 如实报告推了哪几个远端 |
+
+---
+
+## 许可
+
+MIT。本仓库包含来自 ppt-master（Copyright (c) 2025-2026 Hugo He）的品牌矢量素材，继续受其原始 MIT 许可约束。详见 [`LICENSE`](./LICENSE)。

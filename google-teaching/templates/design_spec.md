@@ -5,9 +5,12 @@ summary: Google brand teaching style — user-confirmed teaching deck preset (Mi
 primary_color: "#4285F4"
 ---
 
-# Google Brand Specification
+# Google Teaching Brand Specification
 
 > Identity-only preset. No SVG page roster — pages are composed freely under these constraints.
+>
+> **本品牌与上游自带的 `google` 品牌的关系**：颜色 / 字体 / 语气 / 图标风格四节继承上游 `google` 品牌（`skills/ppt-master/templates/brands/google/`），并在此基础上叠加用户已确认的高校教学课件版式（§VII 章节过渡页、§VIII 内容页页眉、§IX 随堂测验交互）。差异点：**本品牌为无徽标品牌（§IV），严禁放置任何谷歌图标**。
+> 上游 `google` 品牌更新时，本文件不会自动跟随；如需同步，请手动比对 `google/templates/design_spec.md` 的前六节。
 
 ## I. Brand Overview
 
@@ -45,13 +48,16 @@ The four primary brand colors (Blue / Green / Yellow / Red) carry equal weight i
 > - Page-header two-line system: section label 25.33px (19pt) bold; page title 32px (24pt) bold.
 > - Role anchors: body 24, title 32, subtitle 32, annotation 18, code 22, footnote 16.
 
-## IV. Logo（严禁使用谷歌徽标规则）
+## IV. Logo
 
-> **用户强制规则（2026-09-05 确认）**：
-> 在所有生成的教学课件（包括封面、封底、内容页、小节过渡页等所有页面）中，**严禁放置任何谷歌品牌图标**（包括 `google_wordmark.svg` 和 `google_g_logo.svg`）。保持页面纯净规整的现代学术教学风格，严禁出现商业品牌 Logo。
+> **本品牌为「无徽标」品牌（user-confirmed, 2026-09-05）**：全课件严禁出现任何谷歌品牌图标。
+>
+> 上游 `google` 品牌的双锁标体系（`../images/google_wordmark.svg` / `../images/google_g_logo.svg`）**在本品牌中一律禁用**。`images/` 目录内保留两份上游矢量文件仅为与上游 `google` 品牌保持目录结构一致，**不作为本品牌的可选素材**。
 
-- 封面：仅保留课程标题、副标题与装饰色条，严禁放置 `google_wordmark.svg`。
-- 内容页：右上角保持留白（禁止放置 `google_g_logo.svg`）。
+- **封面**：仅保留课程标题、副标题与装饰色条；严禁放置 `google_wordmark.svg`。
+- **内容页右上角**：保持留白；严禁放置 `google_g_logo.svg`。
+- **章节过渡页 / 封底**：同封面规则。
+- **理由**：教学课件需保持纯净规整的现代学术风格，不出现任何商业品牌标识，避免在课堂与对外材料中产生「背书 / 合作 / 赞助」的暗示。
 
 
 ## V. Voice & Tone

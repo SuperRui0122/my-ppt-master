@@ -1,18 +1,7 @@
 @echo off
 chcp 65001 >nul
-echo [1/2] 正在从 ppt-master 提取最新个性化配置...
-python "%~dp0sync_from_ppt_master.py"
-if %errorlevel% neq 0 (
-    echo 同步失败，请检查路径。
-    pause
-    exit /b
-)
-
-echo [2/2] 正在双线推送到 Gitee 与 GitHub...
-cd /d "%~dp0"
-git add .
-git commit -m "update: sync personalized configurations"
-git push origin main
 echo.
-echo [完成] 最新个性化配置已成功双线同步推送到 Gitee 与 GitHub！
-pause
+echo  [已改名] sync_to_github.bat 现在叫 push.bat，本文件仅作兼容保留。
+echo           它不再谎称「双线推送」—— 现在会如实报告推了哪几个远端。
+echo.
+call "%~dp0push.bat" %*

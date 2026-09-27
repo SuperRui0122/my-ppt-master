@@ -1,0 +1,44 @@
+MIT License
+
+Copyright (c) 2026 SuperRui0122 (my-ppt-master: 教学规约与品牌定制层)
+
+---
+
+本仓库是 ppt-master 的个性化定制扩展包，其中包含来自以下上游项目的素材：
+
+  ppt-master
+  Copyright (c) 2025-2026 Hugo He
+  https://github.com/hugohe3/ppt-master
+  以 MIT License 授权
+
+具体包含：
+  * google-teaching/images/google_g_logo.svg
+  * google-teaching/images/google_wordmark.svg
+    —— 复制自 ppt-master 的 skills/ppt-master/templates/brands/google/images/
+  * google-teaching/templates/design_spec.md 的前六节
+    —— 改编自 ppt-master 的 skills/ppt-master/templates/brands/google/templates/design_spec.md
+
+上述素材继续受其原始 MIT License 约束，版权归 Hugo He 所有。
+
+Google 与 Google 徽标是 Google LLC 的商标。本仓库中的相关矢量素材仅用于
+本地课件制作，不得用于任何暗示 Google 背书、合作或赞助的场合。
+
+---
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
