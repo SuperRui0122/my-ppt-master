@@ -383,6 +383,7 @@ v1.x 的 `SKILL.md` 与 `CUSTOM_STYLE_SPEC.md` 有约 90% 内容重复，且已�
 
 | 版本 | 日期 | 变更 |
 |---|---|---|
+| v2.0.0-2 | 2026-09-27 | 放弃 GitHub 镜像，远端只保留 Gitee； 去除 github 建议远端，删除 ；新增 §4.6（放弃理由 + 离线  冷备方案）； frontmatter  改指 Gitee |
 | v2.0.0 | 2026-09-27 | 重写安装器（改用上游官方注册工具、删除 AGENTS.md 写入）；修复品牌模板 `IV. Logo` 标题致校验失败；合并去重两份漂移规范；并入红线 `RED_LINES.md` 由 `apply.py` 统一管理；新增 `update.bat` / `uninstall.bat` / `push.bat` / `LICENSE` / `.gitignore` |
 | v1.6.0 | 2026-09-27 | 新增 Rule 15（代码物理 4 空格缩进、AST 语法保真、图片 rId 对齐） |
 | v1.5.0 | 2026-09-26 | 页眉体系升级为 B1 双轨（面包屑 + `X.Y.N` 极简标题，零破折号） |
