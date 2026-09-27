@@ -11,6 +11,8 @@ primary_color: "#4285F4"
 >
 > **本品牌与上游自带的 `google` 品牌的关系**：颜色 / 字体 / 语气 / 图标风格四节继承上游 `google` 品牌（`skills/ppt-master/templates/brands/google/`），并在此基础上叠加用户已确认的高校教学课件版式（§VII 章节过渡页、§VIII 内容页页眉、§IX 随堂测验交互）。差异点：**本品牌为无徽标品牌（§IV），严禁放置任何谷歌图标**。
 > 上游 `google` 品牌更新时，本文件不会自动跟随；如需同步，请手动比对 `google/templates/design_spec.md` 的前六节。
+>
+> **权威归属**：§VII / §VIII / §IX 是本品牌的**版式实现细则**（给 Strategist 落 `design_spec.md` 用）。若与用户规约 `my-ppt-master/SKILL.md` 的 §一.4 / §一.6 / Rule 3 / Rule 5 出现不一致，**一律以 `SKILL.md` 为准**，并回来修正本文件。
 
 ## I. Brand Overview
 
