@@ -364,6 +364,7 @@ python "{SKILL_DIR}/scripts/svg_editor/server.py" "<project_path>" --live --time
 > - **单文件 `preview.html`**：静态快照、离线可用、可外发；**改动 `svg_output/` 后必须重跑**，否则是旧版。
 > - **端口 live preview**：实时读取 `svg_output/`，并支持在页面上写批注（`live_preview/annotations.jsonl`，由 `/api/save-all` 回写 SVG）。参数：`--live`（允许空 `svg_output/` 并保持服务）、`--timeout 0`（禁用空闲超时，否则 900s / live 7200s 后自退）、`--port N`、`--no-browser`、`--shutdown`（幂等停掉遗留 live 服务）。
 > - **执行约束**：Agent 侧启动后应**在同一条命令内**完成 `curl http://127.0.0.1:<port>/` 探活并报告 URL；若进程随后被回收（沙箱环境常见），必须如实告知用户「端口服务已起但未常驻」，并把上面第 ② 条命令原样交给用户在自己终端执行以常驻。
+> - **一键启动脚本（模板，2026-10-09 增）**：仓库自带 `my-ppt-master/live_preview.bat`，封装了上面第 ② 条命令并**自动打开浏览器**（故**不加** `--no-browser`）。用法：**复制到任意课件项目根目录**（与 `svg_output/` 同级）后**双击即可**，文件名可随意改。它用 `%~dp0` 自定位、用 `%LOCALAPPDATA%` 定位 Python，无需改内容；解释器若不在默认位置，改脚本里的 `PY` 行即可。⚠️ 该脚本**必须以 CRLF 行尾保存**（见 `.gitattributes` 的 `*.bat text eol=crlf`），LF 行尾可能让 cmd 解析异常。
 >
 > **第 7 步实操提示**：`svg_to_pptx.py` 的 `--no-animations` **不能与** `-t none` 同时使用（会报 `cannot be combined with transition or object-animation overrides`）；只传 `--no-animations` 即可同时禁掉页内动画与切页特效。
 >
