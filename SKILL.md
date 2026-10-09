@@ -8,7 +8,10 @@ description: >
   lecture mode with 2-page split quizzes, split-page vertical anti-whitespace balance, token-aware
   orphan-free text wrapping, inner callout anti-occlusion bi-directional auto-fit with Z-Order
   zero-collision gate, and code/pseudocode physical 4-space indentation with AST syntax, runtime
-  name-resolution & image rId integrity gates).
+  name-resolution & image rId integrity gates). Also ships the mandatory toolchain and pre-delivery
+  gate checklist: the SVG-layer layout audit gate (line-spacing overlap, in-card overflow, text
+  collision, badge overflow), the single-file preview builder, and the port-based live preview
+  (svg_editor server with on-page annotations).
 metadata:
   version: "2.1.0"
   author: "SuperRui0122"
@@ -214,6 +217,17 @@ metadata:
      - **外框固定满高**：左右双栏或全宽卡片外框统一锁定 `y = 114, h = 548`（底边 `y = 662`）；
      - **底部内嵌核心结论框（`render_card_callout`）**：在卡片内部底端 `y = 564, h = 82`（底边 `646`，距外框底边 `16px`）嵌入带主题色细边框的核心小结框（文本严格控制在 **2 行以内**，防止纵向越界）；
      - **正文弹性伸展（`target_bottom = 546`）**：正文要点区自动计算末尾至 `y = 546` 的剩余空间，按比例分配给条目间距 `item_gap`（上限 `+26px`）与行高 `line_h`（上限 `+5px`），使卡片内部均匀呼吸、零底部空洞。
+     - **行高上限例外（user-confirmed, 2026-10-07）**：上述 `item_gap +26px` / `line_h +5px` 是**优先区间**，不是硬上限。当卡片正文已达 §9 的字号上限（`16.0pt` / `21px`）而底部空洞仍无法被上述区间填满时（典型场景：6~8 行文字装进 `h = 380 ~ 548px` 的高卡片，仅靠 `+26/+5` 最多只能填 ~82px，而空洞可达 190px），**允许继续放大行距与段距直至填满**，以消除 §9.3 明令禁止的「大盒装小字」死白。但必须同时满足三条约束：
+       1. **字号不得突破 `21px`**（`16.0pt`，§9 硬上限）——严禁用「继续放大字号」冒充填空；
+       2. **内容底边不得越过容器内边距**（`card_bot - 20px`）——严禁为了填满而越界；
+       3. **行距不得小于 `1.45 × 字号`**（且 ≥ 本文件 §13.5 门禁 A 类的 `0.85 × 字号` 下限）——严禁把行距压密制造重叠。
+     - **执行顺序铁律**：**先定字号（压缩或放大至能装下且不超 21px）➔ 再撑行距/段距（先取 §11.2 优先区间，不足再启用上条例外）**。严禁跳过字号判定直接用超大行距填满。
+     - **卡片高度贴合内容（Content-Driven Card Height，user-confirmed 2026-10-07）**：弹性伸展有物理上限 —— 例如「4 行文字装进 `570 × 380px` 卡片」，即使字号顶到 `21px`、行距放宽到 `2.0×` 也只能填到约 50%，剩下的空白**无论怎么调行距都消不掉**。此时唯一正确的解法是**收缩卡片高度去贴合内容**，而不是继续拉行距制造松散排版：
+       - 卡片高度按内容自然高度计算（标题块 + 折行行数 × 行距 + 段距 + 上下内边距），取 `ch = clamp(自然高度, band × 0.62, band)`；
+       - 收缩后**在正文区内垂直居中**（`y = band_top + (band_h - ch) / 2`），使留白均匀分布在卡片上下，读作有意的呼吸而非框内空洞；
+       - 同一行 / 同一网格的并列卡片取**统一高度**（各行内容自然高度的最大值），保持节奏感稳定（§9.2）；
+       - `2×2` 网格另受「2 行 + 行距」上限约束：`ch ≤ (band_h - gap) / 2`；
+       - **判定阈值**：卡片文字填充率 **≥ 62%** 视为合格；实测 < 50% 必须收缩卡片高度。填充率 = `(末行底边 - 卡片标题块下沿) / (卡片内可用高度)`。
   3. **短终端回显页“左缩高 + 补底卡”左右齐平结构**：
      - 当左侧深色控制台运行回显较少（仅 10~14 行）时，若强行画成 `h = 548` 会导致黑框下半部出现大面积死黑；此时应将左侧深色终端框高度收缩为 **`h = 424 ~ 428`**，并在左下方 `y = 552 ~ 556` 补入一张 `h = 106 ~ 110` 的浅色 **“控制台回显定量核验结论卡”**，与右侧解析卡片底边（`y = 662`）严格齐平。
 
@@ -225,6 +239,17 @@ metadata:
   - 每一行折行后的总像素宽度必须严格 `<= max_width`（**零超宽容忍**，严禁为了消除末行孤字而允许上一行超宽硬塞）。
 - **“下推词元”消灭 1~2 字孤行（Orphan Tail Prevention）**：
   - 当单元格或卡片段落折行后，若最后一行仅剩 `<= 2` 个可见字符（如单字“现”、“宽”、“秒？”等孤字尾行），必须**从倒数第二行末尾弹出 1 个词元（Token）下推拼接到最后一行开头**——既使倒数第二行变短（绝不越界），又使最后一行增至 3~4 个字符（彻底消灭孤字尾行），同时保持总行数不变。
+- **下推铁律：只推 1 个词元，且不得掏空首行（2026-10-07 补记）**：
+  - 下推**严格只移动 1 个 Token**。严禁实现成「按标点位置回溯切割」——那会一次推下多个词元，把倒数第二行削到一半以下。
+    实测事故：`• 对纯理论语法讲授抗拒度高，重视「上手即见效」；` 被一次推下 9 个字，首行只剩 53% 宽度，视觉上「逗号后就换行，后面明明还有位置」。
+  - **断句标点集里严禁包含空格**。空格被误当标点会导致扫描到 `•` 后的空格就切，把 `• 严禁私自拔插…` 切成 `["•", "严禁私自拔插…"]`（项目符号与正文分离，是高频投诉点）。
+  - 下推后倒数第二行宽度**不得低于 `0.55 × max_width`**；达不到就放弃下推，宁可留 2 字尾行。
+- **列表符号严禁独占一行（Marker Orphan Ban）**：
+  - `•`、`·`、`▪`、`1.`、`(1)` 等列表符号**绝不允许单独占一行**。若下一行首词元太长放不进符号后面，就把该词元按宽度硬切一段补上来（见下条），而不是让符号孤零零留在行尾。
+- **超长 ASCII 词元允许硬切（Long-ASCII Split Exception）**：
+  - 上条「严禁截断英文单词」有一处必要例外：当**单个 ASCII 词元自身就超过可用宽度 105%** 时（典型：超长 URL、`C:\Windows\System32\...` 绝对路径、长标识符），换行无法解决，必须按宽度硬切成若干段。
+  - 容差取 `105%`：本文件 §12 的保守字宽系数本身已含约 8% 余量，略超一点（如 41 字符的 `https://pypi.tuna.tsinghua.edu.cn/simple`）**不必硬切**，否则会把 URL 切得七零八落。
+  - 更优先的做法是**在源内容层面规避**：窄栏（≤ 230px）内不要把长绝对路径当项目符号后的首词元，改写为「依次检查 system32、Windows、Python311、Scripts 等目录」这类短词元表达。
 
 ### 13. 父容器内嵌子框防遮挡、双向自适应行距与同级图层（Z-Order）零碰撞规范（Inner Callout Anti-Occlusion, Bi-Directional Auto-Fit & Z-Order Collision Gate）
 - **问题根源与反模式警示**：
@@ -241,6 +266,22 @@ metadata:
      - 卡片底端内嵌小结框（Callout Box）文本严格限制在 **1~2 行**，外框高度根据文本行数自适应收敛为 `h = 68 ~ 72px`，底边贴齐大卡片底边内侧 `card_bot - 12px`（即 `y = 578 ~ 582`），为上方正文释放 `15~18px` 纵向缓冲空间；
   4. **全局同级图层（Z-Order）形状遮挡文字零容忍门禁（Zero Shape-Over-Text Occlusion Gate）**：
      - 交付前必须运行 OpenXML 全量图层碰撞扫描：遍历每一页所有形状，凡是图层靠后（`idx2 > idx1`）的带填充色块（`solidFill` / `gradFill`，不含章节过渡页半透明背景大数字水印）与图层靠前（`idx1`）的文本框发生矩形相交（`ix > 4px` 且 `iy > 2px`），或内嵌子框与上方文字间距 `gap < 16px`，一律判定为**致命遮挡缺陷（Critical Occlusion）**，阻断交付并原位重排修复。
+     - **本条门禁的已知盲区（2026-10-07 补记）**：它工作在**导出后的 OpenXML 层**，且判据是「填充色块 vs 文本框」的矩形相交。因此它**看不见**两类缺陷：① 同一个 `<text>` 内部两个 `<tspan>` 之间行距过密造成的文字上下重叠（OpenXML 里是同一个文本框）；② 卡片内文本越界、卡片内大片空洞。这两类必须由 §13.5 的 **SVG 层版式自审门禁** 兜住。
+  5. **版式自审门禁（Layout Audit Gate · 强制 · SVG 层）**：
+     - **背景**：上游 `svg_quality_checker.py`（本流程唯一强制的 SVG 质量门）只校验**画布级**边界（是否越出 `1280×720`）与结构契约（`data-pptx-*` 标记、分组、字号锚点等）。**卡片内部**的行距重叠、文本越界、文本互压、徽章越界它**一律不查** —— 即本文件 §4、§9.3、§11.2、§13.1 四条规约长期处于「有法可依、无器可查」状态。本条门禁补齐这一层。
+     - **执行时机**：每轮 SVG 创作完成后、跑 `svg_quality_checker.py` 之前（或与之并行），**必须**执行：
+       ```bash
+       python "{ROOT}/my-ppt-master/check_layout.py" "<project_path>"
+       ```
+     - **判据**：以本文件 §12 的保守字宽系数（中文 `1.085 × fs`、ASCII `0.62 × fs`）逐页扫描五类缺陷，**必须 0 blocking 才放行**（退出码 0）：
+       - **A 行距过密（阻断）**：同一 `<text>` 内相邻 `<tspan>` 的 `0 < dy < 0.85 × 字号`（`dy = 0` 属行内富文本运行，如「代码 + 绿色行内注释」，跳过不报）；
+       - **B 卡内越界（阻断）**：文本包围盒超出所在卡片右界（容差 `8px`）或下界（容差 `6px`）；
+       - **C 文本互压（阻断）**：两个文本块包围盒相交（`ix > 6px` 且 `iy > 4px`）；
+       - **D 徽章越界（阻断）**：带 `rx` 的小色块（宽 `≤ 160px`，如 `Step 01`、`第 1 题` 徽章）内文本宽度超出色块；
+       - **E 折行过早（advisory，不阻断）**：同段落内非末行、非加粗行的宽度 `< 0.58 × 同块最宽行`。段落边界由 `dy` 明显大于行距、或遇到加粗小标题来切分。
+         此项为**启发式提示**：窄栏（≤ 230px）里的 2 行折行、以及必须整体保留的长英文词元（`Store / Save`、`PyCharm`）都会正常触发，**由人判断**，不计入阻断。它真正要抓的是 §12 那个「下推掏空首行」事故。
+     - **`--json` 可写出 `validation/layout_audit.json`**（含 `blocking` / `advisory` 两个计数）作为审计证据。
+     - **改渲染器后必须重跑**：本条门禁的失效模式是「渲染器有 bug 但门禁没跑」，而非「门禁判错」。凡是改动卡片 / 步骤 / 表格 / 代码面板等版式函数，无论改动多小，都必须重跑本门禁。
 
 ### 14. 跨小节迁移与增删幻灯片后的 B1 双轨标题全局单调重排与字数门禁（Cross-Section Slide Relocation, B1 Monotonic Re-Indexing & Length Gate Rule）
 - **问题根源**：将幻灯片跨小节抽离或迁移（如将第 1 节的 AI 案例移入第 2 节、将检索对比移入第 3 节）时，若仅替换编号前缀而未同步更新上行专题名或重置下行三级页序 `N`（如上行残留源章节名、或下行无 `.1`、`.2` 直接从 `3.1.3` 起步），会导致目标小节出现**断头尾号（缺失 `.1`、`.2`）**、**编号回跳（`2.2 -> 2.3 -> 2.2 -> 2.3`）**、**同号异名冲突（同一 `X.Y` 在不同页上行对应不同专题简称）**以及**破折号长句残留**。
@@ -287,6 +328,46 @@ metadata:
      - [ ] 门禁 A（`ast.parse()`）0 报错；
      - [ ] 门禁 B 已执行：可隔离的已 `exec` 并逐字比对回显；不可隔离的已过名称解析 + `import` 检查；
      - [ ] 若依赖第三方库，已在页面注明安装命令。
+
+### 16. 配套工具链与交付前门禁清单（Toolchain & Pre-Delivery Gate Checklist）
+
+本仓库自带两支脚本。**它们不是可选便利工具，而是本文件多条规约的唯一可执行校验**；跳过它们等于让规约失效。
+
+| 脚本 | 用途 | 归属规约 |
+|---|---|---|
+| `build_preview.py` | 把 `<project>/svg_output/` 打包成**单文件** `<project>/preview.html`（内联 84+ 页 SVG、图片转 base64 data URI、左缩略图 + `←/→` 翻页、零依赖）。用于向用户交付**真实可浏览**的预览，取代「用文字描述页面」 | 红线 R4（必须给真实预览地址） |
+| `check_layout.py` | **SVG 层版式自审门禁**：四类检查（行距过密 / 卡内越界 / 文本互压 / 徽章越界），必须 `0 issues` 才放行 | §4、§9.3、§11.2、§13.1、§13.5 |
+| `svg_editor/server.py` | 启动**端口式 live preview**（本地 Flask + 交互 Web UI，可在页面上直接写批注、落到 `<project>/live_preview/annotations.jsonl`）。与 `preview.html` 构成**双轨预览**，两者都要出 | 红线 R4（必须给真实预览地址） |
+
+```bash
+python "{ROOT}/my-ppt-master/build_preview.py" "<project_path>"            # -> <project>/preview.html
+python "{ROOT}/my-ppt-master/check_layout.py" "<project_path>" --json      # -> validation/layout_audit.json
+python "{SKILL_DIR}/scripts/svg_editor/server.py" "<project_path>" --live --timeout 0 --no-browser
+```
+
+**交付前门禁执行顺序（缺一不可，逐条留证）**：
+
+| 序 | 门禁 | 命令 | 通过判据 |
+|:--:|---|---|---|
+| 1 | 归因完整性 | `python "{SKILL_DIR}/scripts/attribution_guard.py"` | 退出码 0 |
+| 2 | **版式自审**（§13.5） | `python "{ROOT}/my-ppt-master/check_layout.py" "<project>" --json` | **0 issues**，退出码 0 |
+| 3 | AST 语法（§15.4） | 对课件中所有 Python 代码块执行 `ast.parse()` | 0 `SyntaxError` / 0 `IndentationError` |
+| 4 | 双行标题正则（§14.4） | 全课件双行页眉正则扫描 | 0 超长 / 0 破折号 / 0 断号 / 0 回跳 / 0 冲突 |
+| 5 | **SVG 质量门** | `python "{SKILL_DIR}/scripts/svg_quality_checker.py" "<project>" --canonical-authoring --stage final --json` | 0 error（warning 需逐条评估） |
+| 6 | **预览交付（R4 · 双轨，两样都要）** | ① `python "{ROOT}/my-ppt-master/build_preview.py" "<project>"` ② `python "{SKILL_DIR}/scripts/svg_editor/server.py" "<project>" --live --timeout 0 --no-browser` | ① 产出 `<project>/preview.html` ② 报告 `<project>/live_preview/lock.json` 里的**真实** URL（**禁止凭经验编造端口号**） |
+| 7 | 导出后净化（§6） | 解包校验 `ppt/slides/*.xml` 中 `<p:timing>` 与 `<p:transition>` 计数 | **均为 0** |
+| 8 | Z-Order 遮挡（§13.4） | OpenXML 图层碰撞扫描 | 0 Critical Occlusion |
+
+> **顺序说明**：第 2 步必须排在第 5 步之前。`svg_quality_checker.py` 只查画布级边界，若版式缺陷未被第 2 步拦下，它会全绿放行、缺陷一路跑到导出与用户眼前（2026-10-07 实际事故）。
+>
+> **第 6 步双轨预览说明（2026-10-09 用户要求固化）**：
+> - **单文件 `preview.html`**：静态快照、离线可用、可外发；**改动 `svg_output/` 后必须重跑**，否则是旧版。
+> - **端口 live preview**：实时读取 `svg_output/`，并支持在页面上写批注（`live_preview/annotations.jsonl`，由 `/api/save-all` 回写 SVG）。参数：`--live`（允许空 `svg_output/` 并保持服务）、`--timeout 0`（禁用空闲超时，否则 900s / live 7200s 后自退）、`--port N`、`--no-browser`、`--shutdown`（幂等停掉遗留 live 服务）。
+> - **执行约束**：Agent 侧启动后应**在同一条命令内**完成 `curl http://127.0.0.1:<port>/` 探活并报告 URL；若进程随后被回收（沙箱环境常见），必须如实告知用户「端口服务已起但未常驻」，并把上面第 ② 条命令原样交给用户在自己终端执行以常驻。
+>
+> **第 7 步实操提示**：`svg_to_pptx.py` 的 `--no-animations` **不能与** `-t none` 同时使用（会报 `cannot be combined with transition or object-animation overrides`）；只传 `--no-animations` 即可同时禁掉页内动画与切页特效。
+>
+> **第 5 步前置提示**：改动 `svg_output/` 后**必须重跑第 5 步刷新 `validation/svg_quality_report.json`**，否则报告指纹过期，导出器会直接拒绝导出。
 
 ---
 

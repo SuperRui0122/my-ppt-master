@@ -1,7 +1,7 @@
 # my-ppt-master
 
 > 配套 [ppt-master](https://github.com/hugohe3/ppt-master)（MIT，作者 Hugo He）的**教学课件定制层**。
-> 提供无徽标教学品牌模板 `google-teaching`、28 条教学排版与动效强制规约（§一 排版 6 + §二 教学红线 15 + §三 讲稿 1），以及两台电脑协同备课的完整流程。
+> 提供无徽标教学品牌模板 `google-teaching`、23 条教学排版与动效强制规约（§一 排版 6 + §二 教学红线 16 + §三 讲稿 1），以及两台电脑协同备课的完整流程。
 >
 > **当前版本 v2.1.0**（2026-09-27）—— 重写安装器，修复 v1.x 的品牌注册失效与 `git pull` 冲突问题；加固 Rule 15 代码保真门禁（`data-lead` 权威缩进 + 语义可运行门禁）。
 > 详细安装步骤、双机协作流程、故障排查见 **[`CUSTOM_STYLE_SPEC.md`](./CUSTOM_STYLE_SPEC.md)**。
@@ -45,8 +45,9 @@ pip install pyyaml
 
 | 文件 / 目录 | 作用 |
 |---|---|
-| `SKILL.md` | **规则正文**。28 条教学排版与动效强制规约（唯一权威源） |
+| `SKILL.md` | **规则正文**。23 条教学排版与动效强制规约 + 交付前门禁清单（唯一权威源） |
 | `RED_LINES.md` | **最高优先级红线**。R1~R6：停在 SVG 不抢跑导出、默认走 Default、动手前声明路线、给真实预览地址、确认门不得代签、考核内容忠于源文档 |
+| `check_layout.py` | **SVG 层版式自审门禁**（§16）：行距过密 / 卡内越界 / 文本互压 / 徽章越界，0 issues 才放行 |
 | `CUSTOM_STYLE_SPEC.md` | 安装步骤、双机协作流程、故障排查、历史缺陷说明 |
 | `google-teaching/` | 无徽标教学品牌模板（`templates/design_spec.md` + 矢量素材） |
 | `apply.py` / `apply.bat` | 安装器（幂等，可反复运行） |
