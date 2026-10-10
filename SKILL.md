@@ -13,7 +13,7 @@ description: >
   collision, badge overflow), the single-file preview builder, and the port-based live preview
   (svg_editor server with on-page annotations).
 metadata:
-  version: "2.1.0"
+  version: "2.2.0"
   author: "SuperRui0122"
   repository: "https://gitee.com/wang-changani/my-ppt-master"
   upstream: "https://github.com/hugohe3/ppt-master (MIT, Copyright (c) 2025-2026 Hugo He)"
@@ -71,6 +71,19 @@ metadata:
    - **左侧**：`《课程名称》·第X节`（导览页用 `《课程名称》·课程导览`，总结页用 `《课程名称》·课程总结`）；
    - **右侧**：页码 `NN / Total`（如 `45 / 93`），属性 `x=1240 text-anchor="end"`；
    - 页脚组包围盒约 `40 660 1200 40`。
+
+7. **封面富信息固定版式（Mandatory Rich-Info Cover Template，2026-10-10 增补）**：
+   - **唯一标准模板**：封面一律采用「富信息版式」。参考样板为本机 `ppt-master/projects/ppt-mysql-adult-main/ppt-mysql-adult-main/mysql-adult-ch04_ppt169_20260905/svg_output/01_slide.svg`（样板路径仅作对照，任何机器须按下列元素清单复现，不得以「找不到样板」为由自行发挥）；
+   - **固定元素清单（自上而下，缺一即违规）**：
+     1. **顶部徽章**：`学期 · 专业 · 主讲`（浅底胶囊，主色描边，如 `26 春 · 大数据技术专业核心课 · 主讲 王瑞`）；
+     2. **主标题 `54px` 加粗**（如 `《MySQL 数据库》大课 6`）+ **副标题 `36px`**（本课核心主题）；
+     3. **关键词行**：本课 3~5 个核心技术词，中灰 `20~21px`；
+     4. **三张色头节次卡片**（横排等宽）：每卡对应本册一节课，卡头色条用该节主题色（按四色轮换取色），卡内 3 条真实要点（取自源教案）；
+     5. **底部信息栏**：`适用层次 | 学时安排 | 前置基础`，`19~20px`，**单行总宽严禁压到右下页码**（按保守字宽系数中文 1.085×fs 预估，超长先缩短再上墙）；
+     6. **页面底缘四色分段条**（蓝绿黄红各占 1/4）；
+   - **严禁两种劣化封面**：① 极简居中横幅版（一条浅底横幅 + 一行字，信息密度过低）；② 旧版左对齐版（面包屑 + 分隔线之后大片留白、内容挤在左半边）；
+   - **内容保真**：徽章、三卡要点、前置基础一律取自源教案与本册既有页面（前置基础须与上一册/上一大课实际内容衔接），禁止编造；
+   - **交付自查**：导出前按上述 6 元素逐项核对封面，缺任一项即返工。
 
 ---
 
