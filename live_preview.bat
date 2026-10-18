@@ -1,6 +1,9 @@
 @echo off
 chcp 65001 >nul
 title PPT Live Preview
+rem [DEPRECATED 2026-10-18] Live preview is no longer part of the delivery gate.
+rem Preview is delivered as a single-file preview.html: python build_preview.py <project>
+rem Kept for optional manual use only. See RED_LINES.md R4.
 
 rem ============================================================
 rem  PPT Live Preview - one-click launcher for the SVG live editor

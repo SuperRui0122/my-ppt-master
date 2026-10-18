@@ -32,16 +32,21 @@
 
 ---
 
-**R4 — 必须提供真实的浏览器预览地址。**
+**R4 — 预览只走单文件 `preview.html`，端口式 live preview 已废除。**
 
-不得只用文字在对话里描述页面效果。必须启动：
+不得只用文字在对话里描述页面效果。质量门跑完后**必须**执行：
 
 ```bash
-python3 "${SKILL_DIR}/scripts/svg_editor/server.py" <project_path> --daemon
+python "{ROOT}/my-ppt-master/build_preview.py" <project_path>
 ```
 
-并把启动输出中的**真实 URL**（或 `<project_path>/live_preview/lock.json` 里的地址）报告给用户。
-禁止凭经验编造端口号。
+产出 `<project_path>/preview.html`（单文件、内联全部 SVG 与图片、`←/→` 翻页 + 缩略图 + 讲稿对照、零依赖），并把该文件的**绝对路径**报告给用户。
+
+- **改动 `svg_output/` 或讲稿后必须重跑**，否则交付的是旧快照；
+- **不再要求、也不再允许**把启动 `svg_editor/server.py` 端口服务当作交付门禁；不得读取或报告 `live_preview/lock.json`，**不得报告、更不得编造本地端口 URL**；
+- 端口式 live preview 降级为**纯可选**：仅当用户当轮明确要求实时批注时才启动，**不进质量门清单、不影响交付判定**。
+
+> 改写记录：R4 原为「必须提供真实浏览器预览地址（live server + lock.json URL）」，2026-10-18 由用户本人要求改写为单文件 `preview.html`，理由是端口预览不好用。
 
 ---
 

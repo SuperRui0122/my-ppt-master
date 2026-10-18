@@ -352,12 +352,11 @@ metadata:
 |---|---|---|
 | `build_preview.py` | 把 `<project>/svg_output/` 打包成**单文件** `<project>/preview.html`（内联 84+ 页 SVG、图片转 base64 data URI、左缩略图 + `←/→` 翻页、零依赖）。用于向用户交付**真实可浏览**的预览，取代「用文字描述页面」 | 红线 R4（必须给真实预览地址） |
 | `check_layout.py` | **SVG 层版式自审门禁**：四类检查（行距过密 / 卡内越界 / 文本互压 / 徽章越界），必须 `0 issues` 才放行 | §4、§9.3、§11.2、§13.1、§13.5 |
-| `svg_editor/server.py` | 启动**端口式 live preview**（本地 Flask + 交互 Web UI，可在页面上直接写批注、落到 `<project>/live_preview/annotations.jsonl`）。与 `preview.html` 构成**双轨预览**，两者都要出 | 红线 R4（必须给真实预览地址） |
+| `svg_editor/server.py` | 启动**端口式 live preview**（本地 Flask + 交互 Web UI，可在页面上直接写批注、落到 `<project>/live_preview/annotations.jsonl`）。**2026-10-18 起已从交付门禁中移除**，仅在用户当轮明确要求实时批注时才使用 | 非门禁（可选工具） |
 
 ```bash
 python "{ROOT}/my-ppt-master/build_preview.py" "<project_path>"            # -> <project>/preview.html
 python "{ROOT}/my-ppt-master/check_layout.py" "<project_path>" --json      # -> validation/layout_audit.json
-python "{SKILL_DIR}/scripts/svg_editor/server.py" "<project_path>" --live --timeout 0 --no-browser
 ```
 
 **交付前门禁执行顺序（缺一不可，逐条留证）**：
@@ -369,17 +368,17 @@ python "{SKILL_DIR}/scripts/svg_editor/server.py" "<project_path>" --live --time
 | 3 | AST 语法（§15.4） | 对课件中所有 Python 代码块执行 `ast.parse()` | 0 `SyntaxError` / 0 `IndentationError` |
 | 4 | 双行标题正则（§14.4 / §二.17） | 全课件双行页眉正则扫描；练习类页面另按 `^(\d+\.\d+)\.(\d+)(【(练习|作业|测验)】)?(.*)$` 取 `group(3)+group(5)` 计长 | 0 超长 / 0 破折号 / 0 断号 / 0 回跳 / 0 冲突；**标签+正文 ≤ 12 字**、0 标签缺失 |
 | 5 | **SVG 质量门** | `python "{SKILL_DIR}/scripts/svg_quality_checker.py" "<project>" --canonical-authoring --stage final --json` | 0 error（warning 需逐条评估） |
-| 6 | **预览交付（R4 · 双轨，两样都要）** | ① `python "{ROOT}/my-ppt-master/build_preview.py" "<project>"` ② `python "{SKILL_DIR}/scripts/svg_editor/server.py" "<project>" --live --timeout 0 --no-browser` | ① 产出 `<project>/preview.html` ② 报告 `<project>/live_preview/lock.json` 里的**真实** URL（**禁止凭经验编造端口号**） |
+| 6 | **预览交付（R4 · 单文件）** | `python "{ROOT}/my-ppt-master/build_preview.py" "<project>"` | 产出 `<project>/preview.html`，向用户报告其**绝对路径**。**不需要端口服务，禁止报告或编造端口 URL** |
 | 7 | 导出后净化（§6） | 解包校验 `ppt/slides/*.xml` 中 `<p:timing>` 与 `<p:transition>` 计数 | **均为 0** |
 | 8 | Z-Order 遮挡（§13.4） | OpenXML 图层碰撞扫描 | 0 Critical Occlusion |
 
 > **顺序说明**：第 2 步必须排在第 5 步之前。`svg_quality_checker.py` 只查画布级边界，若版式缺陷未被第 2 步拦下，它会全绿放行、缺陷一路跑到导出与用户眼前（2026-10-07 实际事故）。
 >
-> **第 6 步双轨预览说明（2026-10-09 用户要求固化）**：
-> - **单文件 `preview.html`**：静态快照、离线可用、可外发；**改动 `svg_output/` 后必须重跑**，否则是旧版。
-> - **端口 live preview**：实时读取 `svg_output/`，并支持在页面上写批注（`live_preview/annotations.jsonl`，由 `/api/save-all` 回写 SVG）。参数：`--live`（允许空 `svg_output/` 并保持服务）、`--timeout 0`（禁用空闲超时，否则 900s / live 7200s 后自退）、`--port N`、`--no-browser`、`--shutdown`（幂等停掉遗留 live 服务）。
-> - **执行约束**：Agent 侧启动后应**在同一条命令内**完成 `curl http://127.0.0.1:<port>/` 探活并报告 URL；若进程随后被回收（沙箱环境常见），必须如实告知用户「端口服务已起但未常驻」，并把上面第 ② 条命令原样交给用户在自己终端执行以常驻。
-> - **一键启动脚本（模板，2026-10-09 增）**：仓库自带 `my-ppt-master/live_preview.bat`，封装了上面第 ② 条命令并**自动打开浏览器**（故**不加** `--no-browser`）。用法：**复制到任意课件项目根目录**（与 `svg_output/` 同级）后**双击即可**，文件名可随意改。它用 `%~dp0` 自定位、用 `%LOCALAPPDATA%` 定位 Python，无需改内容；解释器若不在默认位置，改脚本里的 `PY` 行即可。⚠️ 该脚本**必须以 CRLF 行尾保存**（见 `.gitattributes` 的 `*.bat text eol=crlf`），LF 行尾可能让 cmd 解析异常。
+> **第 6 步预览说明（2026-10-18 用户拍板：只保留 `preview.html`）**：
+> - **单文件 `preview.html`（唯一交付形态）**：静态快照、离线可用、可外发、双击即看；含全部页面内联 SVG、图片 base64、左缩略图、`←/→` 翻页、`N` 切讲稿备注。**改动 `svg_output/` 或讲稿后必须重跑**，否则交付的是旧快照。
+> - **端口式 live preview 已废除**：原「双轨预览」要求（`svg_editor/server.py --live --timeout 0` + 读 `live_preview/lock.json` 的 URL）已于 2026-10-18 由用户本人撤销，理由是端口预览不好用（需常驻进程、URL 随进程回收失效、沙箱环境下经常起不来）。**不得再把起端口服务写进质量门清单，不得报告、更不得编造本地端口 URL。**
+> - **例外**：仅当用户当轮明确要求「实时批注 / 改完立刻看」时，才手动起 `server.py --live --timeout 0`，并如实说明它是否常驻；此路径**不影响交付判定**。
+> - `my-ppt-master/live_preview.bat` 保留但**已停用**（脚本首行已标注），不要再主动分发或写进流程。
 >
 > **第 7 步实操提示**：`svg_to_pptx.py` 的 `--no-animations` **不能与** `-t none` 同时使用（会报 `cannot be combined with transition or object-animation overrides`）；只传 `--no-animations` 即可同时禁掉页内动画与切页特效。
 >
