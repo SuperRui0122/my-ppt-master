@@ -7,13 +7,14 @@ description: >
   single-image-per-slide policy, native step-by-step interactive quiz reveal animations, no-animation
   lecture mode with 2-page split quizzes, split-page vertical anti-whitespace balance, token-aware
   orphan-free text wrapping, inner callout anti-occlusion bi-directional auto-fit with Z-Order
-  zero-collision gate, and code/pseudocode physical 4-space indentation with AST syntax, runtime
-  name-resolution & image rId integrity gates). Also ships the mandatory toolchain and pre-delivery
+  zero-collision gate, code/pseudocode physical 4-space indentation with AST syntax, runtime
+  name-resolution & image rId integrity gates, explicit 【练习】/【作业】/【测验】 badges on exercise
+  slides, and keyword-bold anchoring with single-x inline runs). Also ships the mandatory toolchain and pre-delivery
   gate checklist: the SVG-layer layout audit gate (line-spacing overlap, in-card overflow, text
   collision, badge overflow), the single-file preview builder, and the port-based live preview
   (svg_editor server with on-page annotations).
 metadata:
-  version: "2.2.0"
+  version: "2.2.1"
   author: "SuperRui0122"
   repository: "https://gitee.com/wang-changani/my-ppt-master"
   upstream: "https://github.com/hugohe3/ppt-master (MIT, Copyright (c) 2025-2026 Hugo He)"
@@ -52,9 +53,10 @@ metadata:
        - **教案标题脱水提纯铁律**：当源文档（MD 教案）的小节或专题标题含冒号、破折号 `——`、修辞比喻（如“一维空间的连续连坐”）或排比尾缀（如“原理、底层机制与 AI 协同实战”）时，**严禁原句照搬上墙**！必须剥离比喻与破折号，提纯为核心技术词：**小节简称严格 ≤ 8 字**，**专题简称严格 ≤ 6 字**；单个小节（Section）的二级编号 `X.Y` 归纳在 5 ~ 10 个核心专题内。
      - **下行（第 2 行 · 页面主标题）**：
        - **固定格式（款式 B1）**：**`X.Y.N 本页核心标题`**（如 `3.1.3 千万级数据检索效率对比`、`2.4.1 SHOW DATABASES 查库语法`），`24pt` 加粗深黑 `#202124`；
+       - **练习/作业/测验类页面例外（款式 B1-P）**：凡页面性质是「让学生自己动手写、敲、做」的，编号后**必须紧跟类型标签**，格式为 **`X.Y.N【练习】核心标题`**（如 `2.8.1【练习】当堂实训与达标`、`2.9.1【测验】环境配置核验`），标签与标题之间不留空格；**标签计入下条 12 字上限**（`【练习】` 占 4 字，故标签后正文只剩 ≤ 8 字），详见 §二.17；
        - **字数硬红线与反名词堆砌**：
          1. **严禁出现破折号 `——` 与数字尾缀粘连**：专题归属已上移至第 1 行，下行严禁再写 `3.1 学科导论3——...` 这类汉字粘连数字加破折号的旧式长前缀；
-         2. **核心标题字数严格 ≤ 12 字（含 `X.Y.N ` 前缀总长 ≤ 18 字符）**：强制消除抽象名词堆砌（如将“千万级数据检索效率量级对比”精简为“千万级数据检索效率对比”，严禁在同一标题中叠加“原理/机制/效率/量级/对比/实战”超过 2 个抽象尾缀词）；
+         2. **核心标题字数严格 ≤ 12 字（含 `X.Y.N ` 前缀总长 ≤ 18 字符）**：**练习/作业/测验页的类型标签计入这 12 字，不再另设额度**（标签占 4 字 ⇒ 其后正文 ≤ 8 字）；强制消除抽象名词堆砌（如将“千万级数据检索效率量级对比”精简为“千万级数据检索效率对比”，严禁在同一标题中叠加“原理/机制/效率/量级/对比/实战”超过 2 个抽象尾缀词）；
          3. **严禁机械按页单调累加二级编号**：禁止把幻灯片累加到 `1.49`、`1.50` 这类碎片化编号，同属一个 `X.Y` 专题的多页内容一律通过三级页序 `X.Y.1`、`X.Y.2`、`X.Y.3` 连续推进。
        - **典型课型标准范例**：
          - **同专题多页理论**：上行 `第三节 · 一维数组  ▸  3.1 检索效率导论` ｜ 下行 `3.1.1 线性查找与随机访问概念`、`3.1.2 内存寻址的时间复杂度推导`、`3.1.3 千万级数据检索效率对比`；
@@ -365,7 +367,7 @@ python "{SKILL_DIR}/scripts/svg_editor/server.py" "<project_path>" --live --time
 | 1 | 归因完整性 | `python "{SKILL_DIR}/scripts/attribution_guard.py"` | 退出码 0 |
 | 2 | **版式自审**（§13.5） | `python "{ROOT}/my-ppt-master/check_layout.py" "<project>" --json` | **0 issues**，退出码 0 |
 | 3 | AST 语法（§15.4） | 对课件中所有 Python 代码块执行 `ast.parse()` | 0 `SyntaxError` / 0 `IndentationError` |
-| 4 | 双行标题正则（§14.4） | 全课件双行页眉正则扫描 | 0 超长 / 0 破折号 / 0 断号 / 0 回跳 / 0 冲突 |
+| 4 | 双行标题正则（§14.4 / §二.17） | 全课件双行页眉正则扫描；练习类页面另按 `^(\d+\.\d+)\.(\d+)(【(练习|作业|测验)】)?(.*)$` 取 `group(3)+group(5)` 计长 | 0 超长 / 0 破折号 / 0 断号 / 0 回跳 / 0 冲突；**标签+正文 ≤ 12 字**、0 标签缺失 |
 | 5 | **SVG 质量门** | `python "{SKILL_DIR}/scripts/svg_quality_checker.py" "<project>" --canonical-authoring --stage final --json` | 0 error（warning 需逐条评估） |
 | 6 | **预览交付（R4 · 双轨，两样都要）** | ① `python "{ROOT}/my-ppt-master/build_preview.py" "<project>"` ② `python "{SKILL_DIR}/scripts/svg_editor/server.py" "<project>" --live --timeout 0 --no-browser` | ① 产出 `<project>/preview.html` ② 报告 `<project>/live_preview/lock.json` 里的**真实** URL（**禁止凭经验编造端口号**） |
 | 7 | 导出后净化（§6） | 解包校验 `ppt/slides/*.xml` 中 `<p:timing>` 与 `<p:transition>` 计数 | **均为 0** |
@@ -382,6 +384,47 @@ python "{SKILL_DIR}/scripts/svg_editor/server.py" "<project_path>" --live --time
 > **第 7 步实操提示**：`svg_to_pptx.py` 的 `--no-animations` **不能与** `-t none` 同时使用（会报 `cannot be combined with transition or object-animation overrides`）；只传 `--no-animations` 即可同时禁掉页内动画与切页特效。
 >
 > **第 5 步前置提示**：改动 `svg_output/` 后**必须重跑第 5 步刷新 `validation/svg_quality_report.json`**，否则报告指纹过期，导出器会直接拒绝导出。
+
+### 17. 练习页显式类型标签铁律（Explicit Practice Badge on Exercise Slides）
+- **核心定位（练习必须"看得见"）**：凡是页面性质为「让学生自己动手写、敲、做、交」的，学生与听课教师都必须**在标题层面一眼识别**这是练习页，而不是讲授页；严禁把练习藏在正文卡片里、靠教师口头说明才知情。
+- **三类标签与适用页面（标签紧贴三级编号，其后不留空格）**：
+  | 标签 | 适用页面 | 标题样式范例 |
+  |---|---|---|
+  | `【练习】` | 当堂练习、随堂微练、当堂实训任务、上机实操任务 | `1.5.1【练习】类型与输入`（9 字） |
+  | `【作业】` | 课后作业、周作业、大作业布置页 | `3.6.1【作业】第一周环境部署` |
+  | `【测验】` | 随堂测验出题页（`_q`）；解析页统一用「测验解析：」前缀，不加标签 | `1.10.1【测验】类型与比对` |
+- **字数与格式门禁**：
+  - **标签计入** §一.4 的 12 字上限：`标签 + 标题正文` 合计 **≤ 12 字**；`【练习】/【作业】/【测验】` 各占 4 字，故标签之后的正文严格 **≤ 8 字**（范例：`2.8.1【练习】当堂实训与达标` = 4 + 7 = 11 字，合规）；
+  - 标签**不因"是标签"而豁免**：不得以"标签不算字数"为由把标题写长；标题超限时压缩的是正文用词，不是删标签；
+  - 全页标题只允许出现**一个**标签，严禁 `【练习】【重要】` 叠标；
+  - 上行面包屑（`第X节 · 小节简称 ▸ X.Y 专题简称`）不受影响，保持原格式。
+- **练习页正文三件套（缺一不可）**：
+  1. **做什么**：任务目标与输入/输出要求写清，不给实现步骤；
+  2. **怎么算过**：验收标准可判定（如"四个类型名全对""报错行号与错误名抄写完整"）；
+  3. **不给答案**：练习页正文与代码卡**严禁**出现可直接抄写的参考代码，参考实现必须另起一页（`X.Y.N 参考实现…`）。
+- **自动化门禁（标签计入字数，两段式）**：
+  1. **拆分**：对全部内容页下行标题跑 `^(\d+\.\d+)\.(\d+)(【(练习|作业|测验)】)?(.*)$`，取 `group(3) + group(5)`（即标签 + 标题正文）拼接后计字符数，**必须 ≤ 12**；超限即阻断交付，不得以"标签不算字数"放行；
+  2. **反向扫描**：凡正文出现"练习一/练习二/实训任务/课后作业/微练"字样而标题 `group(3)` 为空的页面，一律判定为标签缺失，同样阻断交付。
+
+### 18. 正文重点词加粗锚点铁律（Keyword Bold Anchoring in Body Text）
+- **核心定位（给长段落装视觉锚点）**：理论卡片、双栏卡片、步骤条、表格单元格等正文段落，若整段同粗细、同颜色地铺排，教室后排学生的视线无处落脚；必须**每段只挑 1~2 个重点词加粗**，形成锚点。
+- **数量与对象硬约束**：
+  - **每段 1~2 个**，严禁零加粗（纯平铺无重点），也严禁整段加粗（等于没有重点）；
+  - 单个加粗词元**不超过 8 个字符**，同段加粗总字数**不超过该段可见字数的 30%**；
+  - **该加粗**：核心术语（类型、变量、路径、环境变量、短路求值）、关键字面量（`str`、`int`、`True`）、函数名（`type()`、`int()`）、结论性短语（"恒为 False"、"必须带引号"）；
+  - **不该加粗**：连接词、语气词、"我们/大家/同学们"、整句口号。
+- **实现规范（两种来源，显式优先）**：
+  - 内容层用 `**词**` 标记显式指定；未标记时由术语词典兜底自动挑选首个高优先级词元；
+  - **一行内多个富文本 run 的坐标铁律**：同一行拆成「前缀 + 加粗词 + 后缀」多个 `<tspan>` 时，**仅第一个 run 携带 `x` 与 `dy`，续接 run 必须省略 `x` 且 `dy="0"`**——省略 `x` 由 SVG 按当前笔位续排，转换到 DrawingML 后合并为同一段落；若续接 run 也写 `x`，会被提升为独立文本框并左对齐重叠，造成叠字。
+- **豁免与协同**：
+  - 通栏 banner（`banner`）与底部结论条（`bottom_banner`）已整句加粗，**不再重复标记**；
+  - 深色终端的等宽回显、代码行内注释保持原语法高亮配色，不加粗；
+  - 页面主标题、卡片栏目标题本就是加粗，不计入本条的"1~2 个"配额。
+- **交付自检清单**：
+  - [ ] 每张内容页的每个正文段落，加粗词元数 ∈ [1, 2]；
+  - [ ] 无整段加粗、无零加粗页面；
+  - [ ] 同行多 run 的续接 `<tspan>` 均未携带 `x`；
+  - [ ] 加粗后文字总宽未越过容器右边界（沿用 §12 保守宽度测算复检）。
 
 ---
 
