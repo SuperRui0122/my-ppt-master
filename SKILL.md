@@ -11,10 +11,11 @@ description: >
   name-resolution & image rId integrity gates, explicit 【练习】/【作业】/【测验】 badges on exercise
   slides, and keyword-bold anchoring with single-x inline runs). Also ships the mandatory toolchain and pre-delivery
   gate checklist: the SVG-layer layout audit gate (line-spacing overlap, in-card overflow, text
-  collision, badge overflow), the single-file preview builder, and the port-based live preview
-  (svg_editor server with on-page annotations).
+  collision, badge overflow) and the single-file preview builder that produces the delivered
+  `preview.html` (no port-based live preview; the on-page annotation server is optional and is
+  never part of the delivery gate).
 metadata:
-  version: "2.2.1"
+  version: "2.3.0"
   author: "SuperRui0122"
   repository: "https://gitee.com/wang-changani/my-ppt-master"
   upstream: "https://github.com/hugohe3/ppt-master (MIT, Copyright (c) 2025-2026 Hugo He)"

@@ -383,7 +383,7 @@ v1.x 的 `SKILL.md` 与 `CUSTOM_STYLE_SPEC.md` 有约 90% 内容重复，且已�
 
 | 版本 | 日期 | 变更 |
 |---|---|---|
-| v2.3.0 | 2026-10-18 | **R4 改写**：废除端口式 live preview（`svg_editor/server.py` + `live_preview/lock.json`）作为交付门禁，预览**只交单文件 `preview.html`**，报告其绝对路径即算交付；端口服务降为「用户当轮明确要求时才用」的可选工具，禁止报告或编造端口 URL。同步改写 `RED_LINES.md` R4、`AGENTS.md` 闸门②、`SKILL.md` §16 工具表与第 6 步、`CUSTOM_STYLE_SPEC.md` §8.1；`live_preview.bat` 保留但停用 |
+| v2.3.0 | 2026-10-18 | **R4 改写**：废除端口式 live preview（`svg_editor/server.py` + `live_preview/lock.json`）作为交付门禁，预览**只交单文件 `preview.html`**，报告其绝对路径即算交付；端口服务降为「用户当轮明确要求时才用」的可选工具，禁止报告或编造端口 URL。同步改写 `RED_LINES.md` R4、`AGENTS.md` 闸门②、`SKILL.md` §16 工具表与第 6 步、`CUSTOM_STYLE_SPEC.md` §8.1；`live_preview.bat` 保留但停用。**同轮补齐**：`SKILL.md` front matter `metadata.version` 2.2.1 → 2.3.0、`description` 删去「port-based live preview」表述（原文与本次 R4 改写相矛盾） |
 | v2.1.0 | 2026-09-27 | **Rule 15 加固**：缩进以 `data-lead` 权威属性为准（消除字号微缩导致的坐标反推失真）、字号微缩改为整块统一（禁止逐行）、Tab 缩进强制规范化为 4 空格（块内禁止混用）、新增「语义可运行门禁」（沙箱 `exec` + 名称解析 + `import` 完整性检查），并纠正原文「100% 直接运行」的过度承诺；新增交付前自检清单 |
 | v2.0.0 | 2026-09-27 | 重写安装器（改用上游官方注册工具、删除 AGENTS.md 写入）；修复品牌模板 `IV. Logo` 标题致校验失败；合并去重两份漂移规范；并入红线 `RED_LINES.md` 由 `apply.py` 统一管理；新增 `update.bat` / `uninstall.bat` / `push.bat` / `LICENSE` / `.gitignore`；远端只保留 Gitee，放弃 GitHub 镜像，新增 §4.6 离线 `.bundle` 冷备方案 |
 | v1.6.0 | 2026-09-27 | 新增 Rule 15（代码物理 4 空格缩进、AST 语法保真、图片 rId 对齐） |
