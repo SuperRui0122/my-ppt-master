@@ -379,7 +379,7 @@ python "{ROOT}/my-ppt-master/check_layout.py" "<project_path>" --json      # -> 
 > - **单文件 `preview.html`（唯一交付形态）**：静态快照、离线可用、可外发、双击即看；含全部页面内联 SVG、图片 base64、左缩略图、`←/→` 翻页、`N` 切讲稿备注。**改动 `svg_output/` 或讲稿后必须重跑**，否则交付的是旧快照。
 > - **端口式 live preview 已废除**：原「双轨预览」要求（`svg_editor/server.py --live --timeout 0` + 读 `live_preview/lock.json` 的 URL）已于 2026-10-18 由用户本人撤销，理由是端口预览不好用（需常驻进程、URL 随进程回收失效、沙箱环境下经常起不来）。**不得再把起端口服务写进质量门清单，不得报告、更不得编造本地端口 URL。**
 > - **例外**：仅当用户当轮明确要求「实时批注 / 改完立刻看」时，才手动起 `server.py --live --timeout 0`，并如实说明它是否常驻；此路径**不影响交付判定**。
-> - `my-ppt-master/live_preview.bat` 保留但**已停用**（脚本首行已标注），不要再主动分发或写进流程。
+> - `my-ppt-master/live_preview.bat` 与各册的 `live_preview/` 运行时目录（`lock.json` / `edits.jsonl`）已于 2026-10-18 删除，仓库内不再保留任何实时预览入口；需要批注时直接调上游 `svg_editor/server.py`。
 >
 > **第 7 步实操提示**：`svg_to_pptx.py` 的 `--no-animations` **不能与** `-t none` 同时使用（会报 `cannot be combined with transition or object-animation overrides`）；只传 `--no-animations` 即可同时禁掉页内动画与切页特效。
 >
