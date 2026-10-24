@@ -356,6 +356,7 @@ v1.x 的 `SKILL.md` 与 `CUSTOM_STYLE_SPEC.md` 有约 90% 内容重复，且已�
 | R4 | 给真实预览 | 必须跑 `build_preview.py` 产出单文件 `preview.html` 并报告其路径；端口式 live preview 已废除，禁止报告或编造端口 URL |
 | R5 | 确认门不得代签 | 用户沉默 ≠ 确认；代为决策必须显著标注 |
 | R6 | 考核内容忠于源文档 | 禁止编造考试形式、评分标准、学分政策 |
+| R7 | 默认不产讲稿 | 默认不产出逐页口播讲稿 / 演讲者备注 / 任何独立讲稿文件；只有用户在本轮明确说「要讲稿 / 演讲稿 / 备注 / 口播稿」才写 |
 
 ### 8.2 教学排版与动效规约（正文见 [`SKILL.md`](./SKILL.md)）
 
@@ -383,6 +384,7 @@ v1.x 的 `SKILL.md` 与 `CUSTOM_STYLE_SPEC.md` 有约 90% 内容重复，且已�
 
 | 版本 | 日期 | 变更 |
 |---|---|---|
+| v2.3.1 | 2026-10-24 | **补记 R7 与模板对齐**：`CUSTOM_STYLE_SPEC.md` §8.1 红线表补入 R7（默认不产讲稿，原 `688e1db` 只改了 `RED_LINES.md` / `SKILL.md` / `PROMPT_TEMPLATE.md`，漏登本表）；`PROMPT_TEMPLATE.md` 同步两处已过时的表述——第 6 步「双轨预览」改为只交单文件 `preview.html`（删除已废除并已删文件的 `live_preview.bat` 端口式说明）、硬性红线补 R7 并把「口播写 Notes」改为「仅用户明确要求时产 Notes」，头部「最后更新」改为 2026-10-24；`SKILL.md` front matter `metadata.version` 同步 2.3.0 → 2.3.1 |
 | v2.3.0 | 2026-10-18 | **R4 改写**：废除端口式 live preview（`svg_editor/server.py` + `live_preview/lock.json`）作为交付门禁，预览**只交单文件 `preview.html`**，报告其绝对路径即算交付；端口服务降为「用户当轮明确要求时才用」的可选工具，禁止报告或编造端口 URL。同步改写 `RED_LINES.md` R4、`AGENTS.md` 闸门②、`SKILL.md` §16 工具表与第 6 步、`CUSTOM_STYLE_SPEC.md` §8.1；`live_preview.bat` 保留但停用。**同轮补齐**：`SKILL.md` front matter `metadata.version` 2.2.1 → 2.3.0、`description` 删去「port-based live preview」表述（原文与本次 R4 改写相矛盾） |
 | v2.1.0 | 2026-09-27 | **Rule 15 加固**：缩进以 `data-lead` 权威属性为准（消除字号微缩导致的坐标反推失真）、字号微缩改为整块统一（禁止逐行）、Tab 缩进强制规范化为 4 空格（块内禁止混用）、新增「语义可运行门禁」（沙箱 `exec` + 名称解析 + `import` 完整性检查），并纠正原文「100% 直接运行」的过度承诺；新增交付前自检清单 |
 | v2.0.0 | 2026-09-27 | 重写安装器（改用上游官方注册工具、删除 AGENTS.md 写入）；修复品牌模板 `IV. Logo` 标题致校验失败；合并去重两份漂移规范；并入红线 `RED_LINES.md` 由 `apply.py` 统一管理；新增 `update.bat` / `uninstall.bat` / `push.bat` / `LICENSE` / `.gitignore`；远端只保留 Gitee，放弃 GitHub 镜像，新增 §4.6 离线 `.bundle` 冷备方案 |

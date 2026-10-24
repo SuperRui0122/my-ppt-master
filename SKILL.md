@@ -15,7 +15,7 @@ description: >
   `preview.html` (no port-based live preview; the on-page annotation server is optional and is
   never part of the delivery gate).
 metadata:
-  version: "2.3.0"
+  version: "2.3.1"
   author: "SuperRui0122"
   repository: "https://gitee.com/wang-changani/my-ppt-master"
   upstream: "https://github.com/hugohe3/ppt-master (MIT, Copyright (c) 2025-2026 Hugo He)"
