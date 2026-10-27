@@ -23,9 +23,10 @@
 
 - **① 停在 SVG（R1）**：写完 `<项目>/svg_output/` + 跑完 SVG 质量门即停。
   **严禁同一轮导出 PPTX**。导出须用户明确说「导出 / 定稿 / 可以了 / export」。
-- **② 真实预览（R4，只有 `preview.html` 一条）**：质量门后跑
-  `python my-ppt-master/build_preview.py <项目目录>`，把生成的 `preview.html`
-  绝对路径报给用户。**不得用文字描述页面**；**不要求也不得报告端口 URL /
+- **② 真实预览（R4 + R8）**：质量门后跑
+  `python my-ppt-master/build_preview.py <项目目录>`，产物固定为
+  `<项目目录>/<册目录名>.preview.html`（**禁止裸 `preview.html`，见 R8**），
+  把该文件**完整文件名 + 绝对路径**报给用户。**不得用文字描述页面**；**不要求也不得报告端口 URL /
   `live_preview/lock.json`**（端口式 live preview 已废除，入口文件与运行时目录均已删除，仅在用户当轮明确要求时才手动起上游 `server.py`）。
 - **③ 成人教育走静态版（SKILL.md §6）**：`ppt-mysql-adult` 等成人专科项目，
   凡"点击揭晓答案"的习题页，**必须拆成 A 提问页 / B 揭晓页 两页静态**，

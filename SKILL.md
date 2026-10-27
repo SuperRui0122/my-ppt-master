@@ -12,10 +12,10 @@ description: >
   slides, and keyword-bold anchoring with single-x inline runs). Also ships the mandatory toolchain and pre-delivery
   gate checklist: the SVG-layer layout audit gate (line-spacing overlap, in-card overflow, text
   collision, badge overflow) and the single-file preview builder that produces the delivered
-  `preview.html` (no port-based live preview; the on-page annotation server is optional and is
-  never part of the delivery gate).
+  `<deck-dir-name>.preview.html` (filename must identify the deck — see red line R8; no port-based
+  live preview; the on-page annotation server is optional and is never part of the delivery gate).
 metadata:
-  version: "2.3.1"
+  version: "2.4.0"
   author: "SuperRui0122"
   repository: "https://gitee.com/wang-changani/my-ppt-master"
   upstream: "https://github.com/hugohe3/ppt-master (MIT, Copyright (c) 2025-2026 Hugo He)"
@@ -76,7 +76,7 @@ metadata:
    - 页脚组包围盒约 `40 660 1200 40`。
 
 7. **封面富信息固定版式（Mandatory Rich-Info Cover Template，2026-10-10 增补）**：
-   - **唯一标准模板**：封面一律采用「富信息版式」。参考样板为本机 `ppt-master/projects/ppt-mysql-adult-main/ppt-mysql-adult-main/mysql-adult-ch04_ppt169_20260905/svg_output/01_slide.svg`（样板路径仅作对照，任何机器须按下列元素清单复现，不得以「找不到样板」为由自行发挥）；
+   - **唯一标准模板**：封面一律采用「富信息版式」。参考样板为本机 `ppt-master/projects/ppt-mysql-adult-main/mysql-adult-ch04_ppt169_20260905/svg_output/01_slide.svg`（样板路径仅作对照，任何机器须按下列元素清单复现，不得以「找不到样板」为由自行发挥）；
    - **固定元素清单（自上而下，缺一即违规）**：
      1. **顶部徽章**：`学期 · 专业 · 主讲`（浅底胶囊，主色描边，如 `26 春 · 大数据技术专业核心课 · 主讲 王瑞`）；
      2. **主标题 `54px` 加粗**（如 `《MySQL 数据库》大课 6`）+ **副标题 `36px`**（本课核心主题）；
@@ -351,12 +351,12 @@ metadata:
 
 | 脚本 | 用途 | 归属规约 |
 |---|---|---|
-| `build_preview.py` | 把 `<project>/svg_output/` 打包成**单文件** `<project>/preview.html`（内联 84+ 页 SVG、图片转 base64 data URI、左缩略图 + `←/→` 翻页、零依赖）。用于向用户交付**真实可浏览**的预览，取代「用文字描述页面」 | 红线 R4（必须给真实预览地址） |
+| `build_preview.py` | 把 `<project>/svg_output/` 打包成**单文件** `<project>/<册目录名>.preview.html`（内联 84+ 页 SVG、图片转 base64 data URI、左缩略图 + `←/→` 翻页、零依赖）。用于向用户交付**真实可浏览**的预览，取代「用文字描述页面」 | 红线 R4（必须给真实预览地址）、R8（文件名带册标识） |
 | `check_layout.py` | **SVG 层版式自审门禁**：四类检查（行距过密 / 卡内越界 / 文本互压 / 徽章越界），必须 `0 issues` 才放行 | §4、§9.3、§11.2、§13.1、§13.5 |
 | `svg_editor/server.py` | 启动**端口式 live preview**（本地 Flask + 交互 Web UI，可在页面上直接写批注、落到 `<project>/live_preview/annotations.jsonl`）。**2026-10-18 起已从交付门禁中移除**，仅在用户当轮明确要求实时批注时才使用 | 非门禁（可选工具） |
 
 ```bash
-python "{ROOT}/my-ppt-master/build_preview.py" "<project_path>"            # -> <project>/preview.html
+python "{ROOT}/my-ppt-master/build_preview.py" "<project_path>"            # -> <project>/<册目录名>.preview.html
 python "{ROOT}/my-ppt-master/check_layout.py" "<project_path>" --json      # -> validation/layout_audit.json
 ```
 
@@ -369,14 +369,15 @@ python "{ROOT}/my-ppt-master/check_layout.py" "<project_path>" --json      # -> 
 | 3 | AST 语法（§15.4） | 对课件中所有 Python 代码块执行 `ast.parse()` | 0 `SyntaxError` / 0 `IndentationError` |
 | 4 | 双行标题正则（§14.4 / §二.17） | 全课件双行页眉正则扫描；练习类页面另按 `^(\d+\.\d+)\.(\d+)(【(练习|作业|测验)】)?(.*)$` 取 `group(3)+group(5)` 计长 | 0 超长 / 0 破折号 / 0 断号 / 0 回跳 / 0 冲突；**标签+正文 ≤ 12 字**、0 标签缺失 |
 | 5 | **SVG 质量门** | `python "{SKILL_DIR}/scripts/svg_quality_checker.py" "<project>" --canonical-authoring --stage final --json` | 0 error（warning 需逐条评估） |
-| 6 | **预览交付（R4 · 单文件）** | `python "{ROOT}/my-ppt-master/build_preview.py" "<project>"` | 产出 `<project>/preview.html`，向用户报告其**绝对路径**。**不需要端口服务，禁止报告或编造端口 URL** |
+| 6 | **预览交付（R4 · 单文件）** | `python "{ROOT}/my-ppt-master/build_preview.py" "<project>"` | 产出 `<project>/<册目录名>.preview.html`（**R8：必须带册标识，禁止裸 `preview.html`**），向用户报告其**完整文件名 + 绝对路径**。**不需要端口服务，禁止报告或编造端口 URL** |
 | 7 | 导出后净化（§6） | 解包校验 `ppt/slides/*.xml` 中 `<p:timing>` 与 `<p:transition>` 计数 | **均为 0** |
 | 8 | Z-Order 遮挡（§13.4） | OpenXML 图层碰撞扫描 | 0 Critical Occlusion |
 
 > **顺序说明**：第 2 步必须排在第 5 步之前。`svg_quality_checker.py` 只查画布级边界，若版式缺陷未被第 2 步拦下，它会全绿放行、缺陷一路跑到导出与用户眼前（2026-10-07 实际事故）。
 >
-> **第 6 步预览说明（2026-10-18 用户拍板：只保留 `preview.html`）**：
-> - **单文件 `preview.html`（唯一交付形态）**：静态快照、离线可用、可外发、双击即看；含全部页面内联 SVG、图片 base64、左缩略图、`←/→` 翻页、`N` 切讲稿备注。**改动 `svg_output/` 或讲稿后必须重跑**，否则交付的是旧快照。
+> **第 6 步预览说明（2026-10-18 用户拍板：只保留单文件预览；2026-10-27 补 R8 命名规则）**：
+> - **单文件预览器（唯一交付形态）**：静态快照、离线可用、可外发、双击即看；含全部页面内联 SVG、图片 base64、左缩略图、`←/→` 翻页、`N` 切讲稿备注。**改动 `svg_output/` 或讲稿后必须重跑**，否则交付的是旧快照。
+> - **文件名必须带册标识（R8）**：产物为 `<册目录名>.preview.html`，例如 `mysql-adult-ch04_ppt169_20260905.preview.html`。所有册统一叫 `preview.html` 时，一旦拷到同一目录就无法区分归属——报告与交付一律给完整文件名。
 > - **端口式 live preview 已废除**：原「双轨预览」要求（`svg_editor/server.py --live --timeout 0` + 读 `live_preview/lock.json` 的 URL）已于 2026-10-18 由用户本人撤销，理由是端口预览不好用（需常驻进程、URL 随进程回收失效、沙箱环境下经常起不来）。**不得再把起端口服务写进质量门清单，不得报告、更不得编造本地端口 URL。**
 > - **例外**：仅当用户当轮明确要求「实时批注 / 改完立刻看」时，才手动起 `server.py --live --timeout 0`，并如实说明它是否常驻；此路径**不影响交付判定**。
 > - `my-ppt-master/live_preview.bat` 与各册的 `live_preview/` 运行时目录（`lock.json` / `edits.jsonl`）已于 2026-10-18 删除，仓库内不再保留任何实时预览入口；需要批注时直接调上游 `svg_editor/server.py`。

@@ -46,7 +46,7 @@ pip install pyyaml
 | 文件 / 目录 | 作用 |
 |---|---|
 | `SKILL.md` | **规则正文**。23 条教学排版与动效强制规约 + 交付前门禁清单（唯一权威源） |
-| `RED_LINES.md` | **最高优先级红线**。R1~R6：停在 SVG 不抢跑导出、默认走 Default、动手前声明路线、只交 `preview.html` 单文件预览、确认门不得代签、考核内容忠于源文档 |
+| `RED_LINES.md` | **最高优先级红线**。R1~R8：停在 SVG 不抢跑导出、默认走 Default、动手前声明路线、只交单文件预览（**文件名必须带册标识，见 R8**）、确认门不得代签、考核内容忠于源文档、默认不产讲稿、预览命名规则 |
 | `check_layout.py` | **SVG 层版式自审门禁**（§16）：行距过密 / 卡内越界 / 文本互压 / 徽章越界，0 issues 才放行 |
 | `CUSTOM_STYLE_SPEC.md` | 安装步骤、双机协作流程、故障排查、历史缺陷说明 |
 | `google-teaching/` | 无徽标教学品牌模板（`templates/design_spec.md` + 矢量素材） |
@@ -55,7 +55,7 @@ pip install pyyaml
 | `push.py` / `push.bat` | 推送器：提交并推送到所有远端 |
 | `uninstall.py` / `uninstall.bat` | 卸载器：把上游还原干净 |
 | `sync_from_ppt_master.py` | 回流工具：把在 ppt-master 里现场调好的品牌模板取回本仓库 |
-| `build_preview.py` / `preview.bat` | **翻页预览器**：把一册逐页 SVG 打包成单文件、离线可用的 `preview.html`（键盘翻页 + 缩略图 + 讲稿对照），不再需要逐页打开 SVG |
+| `build_preview.py` / `preview.bat` | **翻页预览器**：把一册逐页 SVG 打包成单文件、离线可用的 `<册目录名>.preview.html`（键盘翻页 + 缩略图 + 讲稿对照），不再需要逐页打开 SVG |
 
 ### 安装器改了上游哪些文件？
 
@@ -90,10 +90,11 @@ python build_preview.py --all                    # 为 projects 下所有册批�
 python build_preview.py <册目录> --open           # 生成指定册并打开浏览器
 ```
 
-> 💡 **看课件效果别再用文件管理器逐页点开 SVG。** 双击 `preview.bat`，它会为 `ppt-master/projects` 下每一册生成一个 `preview.html`（单文件、含全部图片、可直接拷给别人）。打开后用 `←` `→` 翻页、`S` 看缩略图、`N` 对着讲稿备注备课。
+> 💡 **看课件效果别再用文件管理器逐页点开 SVG。** 双击 `preview.bat`，它会为 `ppt-master/projects` 下每一册生成一个 `<册目录名>.preview.html`（单文件、含全部图片、可直接拷给别人）。打开后用 `←` `→` 翻页、`S` 看缩略图、`N` 对着讲稿备注备课。
+> **文件名带册标识（R8，2026-10-27 起）**：例如 `mysql-adult-ch04_ppt169_20260905.preview.html`。以前所有册统一叫 `preview.html`，拷到同一个文件夹后完全分不清是哪一册。
 > 注意：`preview.html` 是**快照**，改完 SVG 或讲稿后要重跑一次才会刷新。
 >
-> ⚠️ **2026-10-18 起只保留这一种预览。** 原先的端口式 live preview（`svg_editor/server.py` + `live_preview/lock.json` 里的 URL）由用户本人要求废除，理由是端口预览需要常驻进程、URL 随进程回收失效、不好用。现在 R4 只要求产出 `preview.html` 并报告路径；`live_preview.bat` 及各册的 `live_preview/` 运行时目录已一并删除，仓库里不再保留任何实时预览入口。
+> ⚠️ **2026-10-18 起只保留这一种预览。** 原先的端口式 live preview（`svg_editor/server.py` + `live_preview/lock.json` 里的 URL）由用户本人要求废除，理由是端口预览需要常驻进程、URL 随进程回收失效、不好用。现在 R4 只要求产出单文件预览并报告路径；`live_preview.bat` 及各册的 `live_preview/` 运行时目录已一并删除，仓库里不再保留任何实时预览入口。
 
 ---
 
