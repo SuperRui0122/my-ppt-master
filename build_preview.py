@@ -28,8 +28,14 @@
     SVG 里的图片先转 base64 data URI，整个 SVG 再编码成 data:image/svg+xml;base64
     放进 JS 数组。结果是零外部依赖：双击即开、无跨源问题、可直接拷给别人。
 
-姊妹副本：用户级技能 ~/.workbuddy-ai/skills/svg-deck-preview/scripts/build_preview.py
-         改动本文件时请同步那一份（反之亦然）。
+双端规范：
+    产物必须电脑 / 手机竖屏 / 手机横屏三端可用，规则正文见同目录 PREVIEW_SPEC.md，
+    改动后用 check_preview.py 自检（会校验 viewport、100dvh、两个断点、抽屉遮罩、
+    滑动翻页、页数一致与 R8 命名）。桌面端必须逐像素不变 —— 所有移动端规则都写在
+    @media 里，桌面不命中任何一条。
+
+姊妹副本：~/.workbuddy-ai/skills/svg-deck-preview/scripts/build_preview.py
+         本机不存在该副本，无需同步；若日后在别处复制了副本，改动需两边对齐。
 """
 from __future__ import annotations
 
@@ -260,6 +266,7 @@ TEMPLATE = r"""<!DOCTYPE html>
   }
   *{box-sizing:border-box;}
   html,body{height:100%;margin:0;}
+  body{height:100dvh;-webkit-text-size-adjust:100%;}
   body{
     font-family:"Microsoft YaHei","PingFang SC",Arial,sans-serif;
     background:var(--bg); color:var(--ink);
@@ -342,6 +349,112 @@ TEMPLATE = r"""<!DOCTYPE html>
         background:rgba(255,255,255,.94); border:1px solid var(--line2); border-radius:8px;
         padding:8px 12px; line-height:1.7; pointer-events:none; transition:opacity .4s;}
   .hint.fade{opacity:0;}
+
+  /* ================= 移动端（≤820px）：整体重排，桌面端完全不受影响 ================= */
+  @media (max-width:820px), (pointer:coarse){
+    header{height:50px;padding:0 10px;gap:8px;}
+    .brand{display:none;}
+    .cur-title{font-size:13px;}
+    header .tools{gap:6px;}
+    header button{padding:6px 10px;font-size:12px;min-height:34px;}
+    header #btnFit,header #btnFull{display:none;}
+    .cur-title{font-size:12.5px;}
+
+    /* 侧栏 → 左侧抽屉 */
+    #side{
+      position:fixed;left:0;top:50px;bottom:0;width:min(78vw,300px);
+      z-index:60;border-right:1px solid var(--line);
+      transform:translateX(-102%);transition:transform .22s ease;
+      box-shadow:0 0 24px rgba(0,0,0,.20);padding-bottom:28px;
+      overscroll-behavior:contain;
+    }
+    #side.open{transform:translateX(0);}
+    #side.hide{display:block;}
+    #backdrop{
+      position:fixed;left:0;right:0;top:50px;bottom:0;z-index:55;
+      background:rgba(0,0,0,.34);opacity:0;pointer-events:none;transition:opacity .22s;
+    }
+    #backdrop.on{opacity:1;pointer-events:auto;}
+
+    /* 幻灯片撑满宽 */
+    #stage{padding:0;overflow:hidden;}
+    #page{width:100%;height:auto;max-height:100%;border-radius:0;box-shadow:none;}
+    #stage.actual{display:block;overflow:auto;-webkit-overflow-scrolling:touch;}
+    #stage.actual #page{width:auto;max-width:none;max-height:none;}
+
+    /* 讲稿 → 全屏上滑面板 */
+    #notePanel{
+      position:fixed;left:0;right:0;top:50px;bottom:0;width:auto;z-index:70;
+      border-left:0;transform:translateY(101%);transition:transform .22s ease;
+      padding-bottom:80px;
+    }
+    #notePanel.open{transform:translateY(0);}
+    #notePanel.hide{display:block;}
+
+    /* 底部翻页条：够大的触控目标 */
+    footer{height:58px;height:calc(58px + env(safe-area-inset-bottom));gap:8px;padding:0 8px;}
+    footer button{min-width:84px;min-height:44px;font-size:15px;padding:8px 10px;}
+    .pager{font-size:13px;}
+    .pager input{width:54px;min-height:40px;font-size:15px;}
+    .hint{
+      left:50%;right:auto;bottom:70px;transform:translateX(-50%);
+      font-size:11.5px;text-align:center;padding:6px 12px;line-height:1.5;
+    }
+  }
+
+  /* ========== 手机横屏：演示模式（幻灯片全屏，只留左右翻页键） ========== */
+  @media (max-width:900px) and (orientation:landscape),
+         (pointer:coarse) and (orientation:landscape){
+    body{background:#E9EBEF;}
+    header{display:none;}
+    .hint{display:none;}
+
+    /* 抽屉与讲稿面板：横屏一律隐藏，需要时点开才滑入 */
+    #side{
+      position:fixed;left:0;top:0;bottom:0;width:min(78vw,300px);
+      z-index:60;transform:translateX(-102%);
+      transition:transform .22s ease;box-shadow:0 0 24px rgba(0,0,0,.20);
+    }
+    #side.open{transform:translateX(0);}
+    #side.hide{display:block;}
+    #backdrop{position:fixed;left:0;right:0;top:0;bottom:0;z-index:55;
+              background:rgba(0,0,0,.34);opacity:0;pointer-events:none;transition:opacity .22s;}
+    #backdrop.on{opacity:1;pointer-events:auto;}
+    #notePanel{
+      position:fixed;left:0;right:0;top:0;bottom:0;width:auto;z-index:70;
+      border-left:0;transform:translateY(101%);transition:transform .22s ease;
+      padding:18px 18px 20px;
+    }
+    #notePanel.open{transform:translateY(0);}
+    #notePanel.hide{display:block;}
+
+    main{height:100dvh;}
+    #stage{padding:0;height:100dvh;overflow:hidden;}
+    #page{width:auto;height:100%;max-height:100%;border-radius:0;box-shadow:none;}
+
+    /* 底部翻页条 → 悬浮在左右两侧中线的两个圆键 */
+    footer{
+      position:fixed;left:0;right:0;top:0;bottom:0;height:100dvh;
+      background:transparent;border:0;padding:0 12px;
+      align-items:center;justify-content:space-between;
+      pointer-events:none;
+    }
+    footer button{
+      pointer-events:auto;
+      width:52px;height:52px;min-width:0;min-height:0;padding:0;
+      border-radius:50%;border:0;font-size:0;
+      background:rgba(255,255,255,.80);color:#3C4043;
+      box-shadow:0 2px 12px rgba(0,0,0,.16);
+      opacity:.92;
+    }
+    footer button:active{background:#fff;}
+    footer button:disabled{opacity:.22;}
+    footer #prev::before{content:"\2039";font-size:26px;line-height:1;}
+    footer #next::before{content:"\203A";font-size:26px;line-height:1;}
+
+    /* 横屏只要翻页键，页码一律不显示（幻灯片自身页脚已有页码） */
+    .pager{display:none;}
+  }
 </style>
 </head>
 <body>
@@ -363,6 +476,8 @@ TEMPLATE = r"""<!DOCTYPE html>
   <aside id="notePanel" class="hide"><h3>演讲讲稿与演示者备注</h3><div id="noteBody"></div></aside>
 </main>
 
+<div id="backdrop"></div>
+
 <footer>
   <button id="prev">‹ 上一页</button>
   <div class="pager">
@@ -382,6 +497,9 @@ const PAGES = __PAGES_JSON__;
 const TOTAL = PAGES.length;
 
 const $ = id => document.getElementById(id);
+const mqMobile = window.matchMedia('(max-width:820px), (pointer:coarse)');
+const isMobile = () => mqMobile.matches;
+const mqLand = window.matchMedia('(max-width:900px) and (orientation:landscape), (pointer:coarse) and (orientation:landscape)');
 const elTitle = $('curTitle'), elPage = $('page'), elThumbs = $('thumbs');
 const elSide = $('side'), elNotePanel = $('notePanel'), elNoteBody = $('noteBody');
 const elInput = $('pagerInput'), elTotal = $('total');
@@ -398,7 +516,8 @@ PAGES.forEach((p, i) => {
   const im = document.createElement('img');
   im.loading = 'lazy';
   im.decoding = 'async';
-  im.src = p.src;
+  im.dataset.src = p.src;
+  if (!mqMobile.matches) im.src = p.src;
   im.alt = p.title;
 
   const cap = document.createElement('div');
@@ -414,6 +533,16 @@ PAGES.forEach((p, i) => {
   elThumbs.append(d);
   thumbEls.push(d);
 });
+
+let thumbsHydrated = false;
+function hydrateThumbs() {
+  if (thumbsHydrated) return;
+  thumbsHydrated = true;
+  thumbEls.forEach((el, i) => {
+    const im = el.querySelector('img');
+    if (im && !im.getAttribute('src')) im.src = PAGES[i].src;
+  });
+}
 
 function render() {
   const p = PAGES[cur];
@@ -457,14 +586,43 @@ elInput.addEventListener('keydown', e => {
   e.stopPropagation();
 });
 
-function toggle(el) { el.classList.toggle('hide'); }
+const elBackdrop = $('backdrop');
 
-$('btnSide').addEventListener('click', function () {
-  toggle(elSide); this.classList.toggle('on', !elSide.classList.contains('hide'));
-});
-$('btnNote').addEventListener('click', function () {
-  toggle(elNotePanel); this.classList.toggle('on', !elNotePanel.classList.contains('hide'));
-});
+function toggleSide() {
+  const btn = $('btnSide');
+  if (isMobile()) {
+    const open = !elSide.classList.contains('open');
+    elSide.classList.toggle('open', open);
+    elBackdrop.classList.toggle('on', open);
+    btn.classList.toggle('on', open);
+    if (open) hydrateThumbs();
+  } else {
+    elSide.classList.toggle('hide');
+    btn.classList.toggle('on', !elSide.classList.contains('hide'));
+  }
+}
+
+function toggleNote() {
+  const btn = $('btnNote');
+  if (isMobile()) {
+    const open = !elNotePanel.classList.contains('open');
+    elNotePanel.classList.toggle('open', open);
+    btn.classList.toggle('on', open);
+  } else {
+    elNotePanel.classList.toggle('hide');
+    btn.classList.toggle('on', !elNotePanel.classList.contains('hide'));
+  }
+}
+
+function closeDrawer() {
+  elSide.classList.remove('open');
+  elBackdrop.classList.remove('on');
+  $('btnSide').classList.remove('on');
+}
+
+$('btnSide').addEventListener('click', toggleSide);
+$('btnNote').addEventListener('click', toggleNote);
+elBackdrop.addEventListener('click', closeDrawer);
 $('btnFit').addEventListener('click', function () {
   elStage.classList.toggle('actual');
   this.textContent = elStage.classList.contains('actual') ? '原始大小' : '适应窗口';
@@ -473,7 +631,28 @@ $('btnFull').addEventListener('click', () => {
   if (document.fullscreenElement) document.exitFullscreen();
   else document.documentElement.requestFullscreen();
 });
-elStage.addEventListener('click', () => elStage.classList.toggle('actual'));
+elStage.addEventListener('click', () => {
+  if (mqLand.matches) return;
+  if (isMobile() && tMoved) return;
+  elStage.classList.toggle('actual');
+});
+
+/* 手机端左右滑动翻页 */
+let tX = 0, tY = 0, tOn = false, tMoved = false;
+elStage.addEventListener('touchstart', e => {
+  if (e.touches.length !== 1) { tOn = false; return; }
+  tX = e.touches[0].clientX; tY = e.touches[0].clientY; tOn = true; tMoved = false;
+}, {passive: true});
+elStage.addEventListener('touchend', e => {
+  if (!tOn) return;
+  tOn = false;
+  const dx = e.changedTouches[0].clientX - tX;
+  const dy = e.changedTouches[0].clientY - tY;
+  if (Math.abs(dx) > 46 && Math.abs(dx) > Math.abs(dy) * 1.3) {
+    tMoved = true;
+    if (dx < 0) go(cur + 1); else go(cur - 1);
+  }
+}, {passive: true});
 
 document.addEventListener('keydown', e => {
   if (e.target.tagName === 'INPUT') return;
@@ -495,8 +674,25 @@ document.addEventListener('keydown', e => {
 });
 
 elTotal.textContent = TOTAL;
-$('btnSide').classList.add('on');
+
+function syncLayout() {
+  closeDrawer();
+  elNotePanel.classList.remove('open');
+  $('btnNote').classList.remove('on');
+  if (isMobile()) {
+    elSide.classList.remove('hide');
+  } else {
+    elSide.classList.remove('hide');
+    $('btnSide').classList.add('on');
+    hydrateThumbs();
+  }
+}
+if (mqMobile.addEventListener) mqMobile.addEventListener('change', syncLayout);
+syncLayout();
 render();
+if (isMobile()) {
+  $('hint').innerHTML = mqLand.matches ? '左右滑动翻页' : '左右滑动翻页 ｜ 点一下画面放大';
+}
 setTimeout(() => $('hint').classList.add('fade'), 6000);
 </script>
 </body>
