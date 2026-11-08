@@ -15,7 +15,7 @@ description: >
   `<deck-dir-name>.preview.html` (filename must identify the deck — see red line R8; no port-based
   live preview; the on-page annotation server is optional and is never part of the delivery gate).
 metadata:
-  version: "2.5.0"
+  version: "2.6.0"
   author: "SuperRui0122"
   repository: "https://gitee.com/wang-changani/my-ppt-master"
   upstream: "https://github.com/hugohe3/ppt-master (MIT, Copyright (c) 2025-2026 Hugo He)"
@@ -30,6 +30,10 @@ metadata:
 > 本文件由 `apply.py` 通过注入指针的方式挂载进上游 `ppt-master`；上游 `git pull` 后请运行 `update.bat` 恢复挂载。
 >
 > **优先级**：本文件的规则优先于上游 `ppt-master` 的默认取值，包括 Quick 模式的提速默认行为。
+>
+> **行为红线 R1~R10 见 `RED_LINES.md`**（最高优先级）。其中与日常协作直接相关的两条：
+> **R9 审阅模式**——默认只讨论、只记录，不动产出与生成器、不重建预览，仅当用户当轮明说「开始改 / 执行 / 动手」才进修改模式；
+> **R10 审阅台账**——意见落 `notes/<册目录名>_台账.md`，只记要改什么，改完清空只留一行摘要。
 
 ---
 
