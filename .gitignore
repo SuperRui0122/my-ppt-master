@@ -29,3 +29,7 @@ desktop.ini
 
 # ── 预览器产物（是快照，随时可由 build_preview.py 重新生成） ──
 preview.html
+
+# ── 审阅台账（临时工作区，跨会话无意义，不提交；仅保留模板） ──
+notes/*
+!notes/_台账模板.md
