@@ -9,13 +9,14 @@ description: >
   orphan-free text wrapping, inner callout anti-occlusion bi-directional auto-fit with Z-Order
   zero-collision gate, code/pseudocode physical 4-space indentation with AST syntax, runtime
   name-resolution & image rId integrity gates, explicit 【练习】/【作业】/【测验】 badges on exercise
-  slides, and keyword-bold anchoring with single-x inline runs). Also ships the mandatory toolchain and pre-delivery
+  slides, and keyword-bold anchoring with single-x inline runs; every knowledge point rendered as a table +
+  runnable minimal demo + execution-order card, each followed by a 【练习】 page and its review page). Also ships the mandatory toolchain and pre-delivery
   gate checklist: the SVG-layer layout audit gate (line-spacing overlap, in-card overflow, text
   collision, badge overflow) and the single-file preview builder that produces the delivered
   `<deck-dir-name>.preview.html` (filename must identify the deck — see red line R8; no port-based
   live preview; the on-page annotation server is optional and is never part of the delivery gate).
 metadata:
-  version: "2.6.0"
+  version: "2.7.0"
   author: "SuperRui0122"
   repository: "https://gitee.com/wang-changani/my-ppt-master"
   upstream: "https://github.com/hugohe3/ppt-master (MIT, Copyright (c) 2025-2026 Hugo He)"
@@ -432,6 +433,29 @@ python "{ROOT}/my-ppt-master/check_layout.py" "<project_path>" --json      # -> 
   - [ ] 无整段加粗、无零加粗页面；
   - [ ] 同行多 run 的续接 `<tspan>` 均未携带 `x`；
   - [ ] 加粗后文字总宽未越过容器右边界（沿用 §12 保守宽度测算复检）。
+
+### 19. 知识点页三段式与讲练配对铁律（Knowledge-Point Triplet & Teach-Try-Review Pairing）
+- **核心定位（课件是节奏载体，不是知识清单）**：每个知识点在盘面上必须走完「讲清 → 做示范 → 让他练 → 当场评」四拍。缺任何一拍，45 分钟里学生就只能抄，不能写。本条是《课程实训手册/36课时全景实践教学大纲目录.md》§二「六步节奏」在**课件分镜层**的落地：大纲的 ③逐点讲透 / ④讲完立刻练 / ⑤当场讲评，对应到盘面就是「三段式知识点页 → 练习页 → 讲评页」。
+- **知识点页三段式（同一页内三样齐备，缺一不算讲完）**：
+  | # | 载体 | 要求 | 缺了会怎样 |
+  |---|---|---|---|
+  | ① | **拆解表** | 四列：要素 / 代码里长什么样 / 跟什么比 / 写错会怎样 | 只有表 → 学生背得出名词，不知道怎么写 |
+  | ② | **最小可跑代码** | ≤ 6 行、能直接执行，行尾注释与表格逐行对应 | 只有代码 → 学生不知道哪块是重点、与上一条什么关系 |
+  | ③ | **执行顺序卡** | 右栏 3~5 步，说清「这一圈 / 这一趟怎么走」 | 会背写法，却说不出一行一行怎么跑 |
+  - 三样在版面上按「上表 / 左下代码 / 右下顺序」排布，学生视线从「是什么」到「怎么写」再到「怎么跑」单向推进，不得打乱；
+  - **讲评页不受 6 行限制**：讲评需要对照「错写法 vs 对写法」时，代码可到 9~12 行，但必须保持可运行（`py=True` 走 AST 门禁）。
+- **讲练评三页配对（顺序不可颠倒）**：
+  1. 知识点页 → **紧接【练习】页**：只给目标与提示，禁给可抄代码（遵守 §17 三件套）；
+  2. 练习页 → **紧接讲评页**：参考实现 + 逐行拆解 + 一句口诀或判据，不得缺席；
+  3. **禁止**：知识点讲完直接跳下一个知识点；练习后不跟讲评；两道练习攒进同一页；把当堂练习推成课后。
+- **回显页的合法位置（只许在后，不许在前）**：运行结果要么与范例代码**同页并排**（左代码 + 右终端，见 §8），要么用于展示**错误现场**（刷屏、异常回显）；**严禁**把回显放在「讲怎么写」之前当引子 —— 学生先看结局再看写法，既被剧透，又无从与代码对照。
+- **同构复用（语法关系等价 ⇒ 版式必须复用）**：同一课里功能等价的两种写法，盘面版式必须复用，学生不用重新认版式。范例：`while` 三要素与 `for` 结构都用「表 + 最小代码 + 执行顺序」；`continue` 与 `break` 都用「左范例代码 + 右真机回显 + 观察条 + 人话条」。
+- **反例清单（出现任一条，视该节未完成）**：
+  - 先给运行结果、再讲怎么写；
+  - 讲完三页知识点才练第一道；
+  - 练习页里塞参考实现，练习退化成抄写；
+  - 知识点页只有文字卡（只答「是什么」），既无代码也无练习；
+  - 同课两种等价语法，用了两套互不相干的版式。
 
 ---
 

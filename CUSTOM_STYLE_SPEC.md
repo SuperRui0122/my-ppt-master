@@ -18,8 +18,8 @@ D:\南开\PPT-master\
 │
 ├── my-ppt-master\       ← 第 2 层：你的定制仓库（唯一权威源）
 │   │                        你所有的手工编辑都在这里发生
-│   ├── RED_LINES.md         最高优先级红线 R1~R6（停在 SVG、默认 Default…）
-│   ├── SKILL.md             28 条教学排版与动效强制规约（规则正文）
+│   ├── RED_LINES.md         最高优先级红线 R1~R10（停在 SVG、默认 Default、审阅模式…）
+│   ├── SKILL.md             27 条教学排版与动效强制规约（规则正文）
 │   ├── CUSTOM_STYLE_SPEC.md 本文件：安装与协作说明
 │   ├── google-teaching\     无徽标教学品牌模板（design_spec.md + 矢量素材）
 │   ├── apply.py             安装器：把上面几样东西挂载进第 1 层
