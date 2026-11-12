@@ -282,7 +282,9 @@ TEMPLATE = r"""<!DOCTYPE html>
   .cur-title{
     flex:1; min-width:0; font-size:15px; color:var(--ink3);
     white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    cursor:pointer;
   }
+  .cur-title:hover b{color:var(--blue);}
   .cur-title b{color:var(--ink); font-weight:700;}
   .tools{display:flex; gap:8px; flex:none;}
   button{
@@ -345,6 +347,35 @@ TEMPLATE = r"""<!DOCTYPE html>
   .pager input::-webkit-outer-spin-button,
   .pager input::-webkit-inner-spin-button{-webkit-appearance:none; margin:0;}
   .pager input[type=number]{-moz-appearance:textfield;}
+
+  /* 跳到指定页浮层（默认隐藏，不影响桌面布局） */
+  #jumpPop{
+    position:fixed; inset:0; z-index:80; display:none;
+    align-items:center; justify-content:center; background:rgba(0,0,0,.34);
+  }
+  #jumpPop.on{display:flex;}
+  .jp-card{
+    background:var(--panel); border-radius:14px; padding:18px 20px;
+    box-shadow:0 12px 32px rgba(0,0,0,.24); min-width:272px;
+  }
+  .jp-title{font-size:14px; font-weight:700; color:var(--ink2); margin-bottom:12px;}
+  .jp-row{display:flex; align-items:center; gap:8px;}
+  #jumpInput{
+    width:84px; height:44px; font-size:16px; text-align:center; color:var(--ink);
+    border:1.5px solid var(--line); border-radius:8px; font-family:inherit;
+  }
+  #jumpInput:focus{outline:none; border-color:var(--blue);}
+  #jumpInput::-webkit-outer-spin-button,
+  #jumpInput::-webkit-inner-spin-button{-webkit-appearance:none; margin:0;}
+  #jumpInput[type=number]{-moz-appearance:textfield;}
+  #jumpGo{
+    height:44px; padding:0 18px; font-size:14px; font-weight:700; cursor:pointer;
+    background:var(--blue); color:#fff; border:1px solid var(--blue); border-radius:8px;
+  }
+  #jumpCancel{
+    height:44px; padding:0 14px; font-size:14px; cursor:pointer;
+    background:var(--panel); color:var(--ink2); border:1px solid var(--line); border-radius:8px;
+  }
   .hint{position:fixed; right:16px; bottom:72px; font-size:12px; color:var(--muted);
         background:rgba(255,255,255,.94); border:1px solid var(--line2); border-radius:8px;
         padding:8px 12px; line-height:1.7; pointer-events:none; transition:opacity .4s;}
@@ -395,7 +426,7 @@ TEMPLATE = r"""<!DOCTYPE html>
     footer{height:58px;height:calc(58px + env(safe-area-inset-bottom));gap:8px;padding:0 8px;}
     footer button{min-width:84px;min-height:44px;font-size:15px;padding:8px 10px;}
     .pager{font-size:13px;}
-    .pager input{width:54px;min-height:40px;font-size:15px;}
+    .pager input{width:64px;min-height:44px;font-size:16px;border:1.5px solid var(--blue);}
     .hint{
       left:50%;right:auto;bottom:70px;transform:translateX(-50%);
       font-size:11.5px;text-align:center;padding:6px 12px;line-height:1.5;
@@ -461,7 +492,7 @@ TEMPLATE = r"""<!DOCTYPE html>
 
 <header>
   <div class="brand" title="__DECK_TITLE__">__DECK_TITLE__</div>
-  <div class="cur-title" id="curTitle"></div>
+  <div class="cur-title" id="curTitle" title="点击输入页码跳转"></div>
   <div class="tools">
     <button id="btnSide" title="显示/隐藏缩略图 (S)">缩略图</button>
     <button id="btnNote" title="显示/隐藏讲稿备注 (N)">讲稿</button>
@@ -478,10 +509,22 @@ TEMPLATE = r"""<!DOCTYPE html>
 
 <div id="backdrop"></div>
 
+<div id="jumpPop" role="dialog" aria-label="跳转到指定页">
+  <div class="jp-card">
+    <div class="jp-title">跳转到指定页</div>
+    <div class="jp-row">
+      <input id="jumpInput" type="number" min="1" step="1" inputmode="numeric" placeholder="页码">
+      <span style="font-size:14px;color:var(--ink3)">/ <b id="jpTotal">0</b></span>
+      <button id="jumpGo">跳转</button>
+      <button id="jumpCancel">取消</button>
+    </div>
+  </div>
+</div>
+
 <footer>
   <button id="prev">‹ 上一页</button>
   <div class="pager">
-    <input id="pagerInput" type="number" min="1" step="1" value="1">
+    <input id="pagerInput" type="number" min="1" step="1" value="1" inputmode="numeric" title="输入页码后回车跳转">
     <span>/ <b id="total">0</b> 页</span>
   </div>
   <button id="next">下一页 ›</button>
@@ -582,8 +625,44 @@ elInput.addEventListener('change', () => {
   else elInput.value = PAGES[cur].n;
 });
 elInput.addEventListener('keydown', e => {
-  if (e.key === 'Enter') elInput.blur();
+  if (e.key === 'Enter') {
+    const v = parseInt(elInput.value, 10);
+    if (!isNaN(v)) go(v - 1);
+    else elInput.value = PAGES[cur].n;
+    elInput.blur();
+  }
   e.stopPropagation();
+});
+
+/* ---- 跳到指定页浮层：点顶栏页码即可打开（手机端更好点中） ---- */
+const elJumpPop = $('jumpPop'), elJumpInput = $('jumpInput'), elJpTotal = $('jpTotal');
+
+function openJump() {
+  elJpTotal.textContent = TOTAL;
+  elJumpInput.value = PAGES[cur].n;
+  elJumpPop.classList.add('on');
+  /* 必须同步 focus：iOS 只在用户手势的同步栈内才弹键盘 */
+  elJumpInput.focus();
+  elJumpInput.select();
+}
+function closeJump() { elJumpPop.classList.remove('on'); }
+function doJump() {
+  const v = parseInt(elJumpInput.value, 10);
+  if (!isNaN(v)) go(v - 1);
+  closeJump();
+}
+
+elTitle.addEventListener('click', openJump);
+$('jumpGo').addEventListener('click', doJump);
+$('jumpCancel').addEventListener('click', closeJump);
+elJumpPop.addEventListener('click', e => { if (e.target === elJumpPop) closeJump(); });
+elJumpInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); doJump(); }
+  else if (e.key === 'Escape') closeJump();
+  e.stopPropagation();
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && elJumpPop.classList.contains('on')) closeJump();
 });
 
 const elBackdrop = $('backdrop');
