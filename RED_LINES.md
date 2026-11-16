@@ -40,13 +40,13 @@
 python "{ROOT}/my-ppt-master/build_preview.py" <project_path>
 ```
 
-产出 `<project_path>/<册目录名>.preview.html`（**文件名规则见 R8**；单文件、内联全部 SVG 与图片、`←/→` 翻页 + 缩略图 + 讲稿对照、零依赖），并把该文件的**绝对路径**报告给用户。
+产出 `<project_path>/<册目录名>.view.<YYYYMMDD>.html`（**文件名规则见 R8**；单文件、内联全部 SVG 与图片、`←/→` 翻页 + 缩略图 + 讲稿对照、零依赖），并把该文件的**绝对路径**报告给用户。
 
 - **改动 `svg_output/` 或讲稿后必须重跑**，否则交付的是旧快照；
 - **不再要求、也不再允许**把启动 `svg_editor/server.py` 端口服务当作交付门禁；不得读取或报告 `live_preview/lock.json`，**不得报告、更不得编造本地端口 URL**；
 - 端口式 live preview 降级为**纯可选**：仅当用户当轮明确要求实时批注时才启动，**不进质量门清单、不影响交付判定**。
 
-> 改写记录：R4 原为「必须提供真实浏览器预览地址（live server + lock.json URL）」，2026-10-18 由用户本人要求改写为单文件 `preview.html`，理由是端口预览不好用；2026-10-27 起文件名改由 R8 规定（带册标识），R4 不再写死 `preview.html`。
+> 改写记录：R4 原为「必须提供真实浏览器预览地址（live server + lock.json URL）」，2026-10-18 由用户本人要求改写为单文件 `preview.html`，理由是端口预览不好用；2026-10-27 起文件名改由 R8 规定（带册标识），2026-11-16 起改为 `<册目录名>.view.<YYYYMMDD>.html`，R4 不再写死 `preview.html`。
 
 ---
 
@@ -69,22 +69,22 @@ python "{ROOT}/my-ppt-master/build_preview.py" <project_path>
 
 ---
 
-**R8 — 预览文件名必须带册标识，禁止每册都叫 `preview.html`。**
+**R8 — 预览文件名必须带册标识与日期后缀，固定为 `<册目录名>.view.<YYYYMMDD>.html`。**
 
-`build_preview.py` 的产物固定命名为 **`<册目录名>.preview.html`**，落在该册自己的目录下：
+`build_preview.py` 的产物固定命名为 **`<册目录名>.view.<YYYYMMDD>.html`**（当天重复生成覆盖同日文件，不同日期保留各自快照），落在该册自己的目录下：
 
 ```
 projects/ppt-mysql-adult-main/mysql-adult-ch04_ppt169_20260905/
-  └─ mysql-adult-ch04_ppt169_20260905.preview.html
+  └─ mysql-adult-ch04_ppt169_20260905.view.20261116.html
 ```
 
-1. **名字必须能反查出是哪一册**：前缀就是册目录名。禁止 `preview.html`、`preview2.html`、`预览.html`、`最终版.html` 这类看不出归属的名字——多册产物一旦被拷到同一处（下载目录、桌面、外发收件箱）就彻底分不清；
-2. **报告时给完整文件名 + 绝对路径**，不得只说「preview.html 已生成」；
-3. `--all` 批量同理：每册各得一个带册标识的文件，互不覆盖；
+1. **名字必须能反查出是哪一册与哪一天生成**：前缀就是册目录名，后缀为 `.view.<YYYYMMDD>.html`（如 `20261116`）。禁止 `preview.html`、`preview2.html`、`预览.html`、`最终版.html` 这类看不出归属的名字——多册产物一旦被拷到同一处（下载目录、桌面、外发收件箱）就彻底分不清；
+2. **报告时给完整文件名 + 绝对路径**，不得只说「preview.html / view.html 已生成」；
+3. `--all` 批量同理：每册各得一个带册标识与日期的文件，互不覆盖；
 4. 册目录名中的非法字符（`< > : " / \ | ? *`）与空白由脚本清洗为 `_`，清洗后为空则退回 `deck`；
-5. **由脚本强制实现，不靠人工记忆**。若发现某处仍产出裸 `preview.html`，视为 `build_preview.py` 被改坏，先修脚本再交付；发现历史遗留的裸 `preview.html` 时脚本会提示，**不自动删除**。
+5. **由脚本强制实现，不靠人工记忆**。若发现某处仍产出裸 `preview.html` 或未更新的旧 `<册目录名>.preview.html`，视为 `build_preview.py` 被改坏，先修脚本再交付；发现历史遗留的裸 `preview.html` 或旧 `<册目录名>.preview.html` 时脚本会提示，**不自动删除**。
 
-> 改写记录：2026-10-27 由用户本人要求新增。起因：原先所有册统一产出 `preview.html`，文件名完全相同、无法区分，容易打开错册、发错文件。
+> 改写记录：2026-10-27 由用户本人要求新增（初版为 `<册目录名>.preview.html`）；2026-11-16 由用户本人要求精简后缀为 `view` 并加 `YYYYMMDD` 日期后缀（`<册目录名>.view.<YYYYMMDD>.html`），便于区分同册不同审阅批次。
 
 ---
 

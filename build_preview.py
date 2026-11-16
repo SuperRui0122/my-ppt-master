@@ -16,11 +16,11 @@
     项目目录/notes/NN_slide.md    可选，逐页讲稿备注
     项目目录/design_spec.md       可选，用于提取册名与每页标题
 
-产出（**文件名必须带册标识，禁止统一叫 preview.html**）：
-    项目目录/<册目录名>.preview.html
-    例：mysql-adult-ch04_ppt169_20260905/mysql-adult-ch04_ppt169_20260905.preview.html
+产出（**文件名必须带册标识与日期后缀，禁止统一叫 preview.html**）：
+    项目目录/<册目录名>.view.<YYYYMMDD>.html
+    例：mysql-adult-ch04_ppt169_20260905/mysql-adult-ch04_ppt169_20260905.view.20261116.html
     理由：所有册都产出同名 preview.html，一旦被拷到同一处（下载目录、桌面、外发
-    收件箱）就彻底分不清哪份是哪一册。册目录名本身唯一且可反查，故直接用作前缀。
+    收件箱）就彻底分不清哪份是哪一册；加上日期后缀也便于区分不同审阅批次。
 
 为什么做成「自包含单文件」：
     不能简单用 <img src="svg_output/01.svg"> 引用 —— SVG 内部的
@@ -41,6 +41,7 @@ from __future__ import annotations
 
 import argparse
 import base64
+from datetime import datetime
 import json
 import pathlib
 import re
@@ -110,9 +111,10 @@ def deck_slug(root: pathlib.Path) -> str:
     return slug or "deck"
 
 
-def preview_out(root: pathlib.Path) -> pathlib.Path:
-    """预览产物路径：<册目录名>.preview.html（禁止裸 preview.html）。"""
-    return root / (deck_slug(root) + ".preview.html")
+def preview_out(root: pathlib.Path, date_str: str | None = None) -> pathlib.Path:
+    """预览产物路径：<册目录名>.view.<YYYYMMDD>.html（禁止裸 preview.html）。"""
+    tag = date_str or datetime.now().strftime("%Y%m%d")
+    return root / f"{deck_slug(root)}.view.{tag}.html"
 
 
 # ------------------------------------------------------------------ 元数据
@@ -161,7 +163,10 @@ def build(root: pathlib.Path, title: str, *, quiet: bool = False) -> int:
     svg_dir = root / "svg_output"
     notes_dir = root / "notes"
     out = preview_out(root)
-    legacy = root / "preview.html"
+    legacy_files = [
+        root / "preview.html",
+        root / f"{deck_slug(root)}.preview.html",
+    ]
 
     if not svg_dir.is_dir():
         print("找不到 svg_output 目录：%s" % svg_dir, file=sys.stderr)
@@ -241,9 +246,10 @@ def build(root: pathlib.Path, title: str, *, quiet: bool = False) -> int:
         print("  %-40s %3d 页  %5.1f MB  -> %s"
               % (root.name[:40], len(pages),
                  out.stat().st_size / 1024 / 1024, out.name))
-    if legacy.exists() and legacy != out:
-        print("    提示：仍存在旧命名 %s（无册标识，易与其他册混淆），可自行删除。"
-              % legacy.name, file=sys.stderr)
+    for legacy in legacy_files:
+        if legacy.exists() and legacy != out:
+            print("    提示：仍存在旧命名 %s（已改用 <册目录名>.view.<YYYYMMDD>.html），可自行删除。"
+                  % legacy.name, file=sys.stderr)
     if missing:
         print("    警告：%d 处图片引用未找到 -> %s"
               % (len(missing), sorted(set(missing))), file=sys.stderr)

@@ -10,8 +10,8 @@
 
 检查项
 ------
-  P1  产物存在          <project>/<册目录名>.preview.html
-  P2  R8 命名            前缀必须等于册目录名（清洗后）
+  P1  产物存在          <project>/<册目录名>.view.<YYYYMMDD>.html
+  P2  R8 命名            前缀等于册目录名（清洗后）且格式为 <册目录名>.view.<YYYYMMDD>.html
   P3  viewport 元信息    width=device-width + viewport-fit=cover
   P4  移动端高度单位     100dvh（不是 100vh）
   P5  B 布局媒体查询     (max-width:820px), (pointer:coarse)
@@ -32,6 +32,7 @@
 """
 
 import argparse
+from datetime import datetime
 import json
 import os
 import re
@@ -46,10 +47,25 @@ def deck_slug(root):
     return slug or "deck"
 
 
+def find_view_html(root, slug):
+    pattern = re.compile(re.escape(slug) + r"\.view\.(\d{8})\.html$")
+    matches = []
+    for fname in os.listdir(root):
+        m = pattern.fullmatch(fname)
+        if m:
+            path = os.path.join(root, fname)
+            if os.path.isfile(path):
+                matches.append((m.group(1), path))
+    if matches:
+        matches.sort(key=lambda item: item[0], reverse=True)
+        return matches[0][1]
+    return os.path.join(root, "%s.view.%s.html" % (slug, datetime.now().strftime("%Y%m%d")))
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description="单文件预览器双端门禁")
     ap.add_argument("directory", help="含 svg_output/ 的册目录")
-    ap.add_argument("--html", default=None, help="预览产物路径（默认 <册目录名>.preview.html）")
+    ap.add_argument("--html", default=None, help="预览产物路径（默认 <册目录名>.view.<YYYYMMDD>.html）")
     ap.add_argument("--json", action="store_true", help="写 validation/preview_audit.json")
     args = ap.parse_args(argv)
 
@@ -60,7 +76,7 @@ def main(argv=None):
         return 2
 
     slug = deck_slug(root)
-    html_path = args.html or os.path.join(root, slug + ".preview.html")
+    html_path = args.html or find_view_html(root, slug)
     if not os.path.isfile(html_path):
         print("[FAIL] P1 产物不存在：%s" % html_path, file=sys.stderr)
         print("       先跑：python build_preview.py \"%s\"" % root, file=sys.stderr)
@@ -76,10 +92,12 @@ def main(argv=None):
     def add(pid, name, ok, detail="", block=True):
         checks.append((pid, name, ok, block, detail))
 
+    r8_re = re.compile(re.escape(slug) + r"\.view\.\d{8}\.html")
+    r8_ok = bool(r8_re.fullmatch(os.path.basename(html_path)))
     add("P1", "产物存在", True, os.path.basename(html_path))
-    add("P2", "R8 命名", os.path.basename(html_path) == slug + ".preview.html",
-        "" if os.path.basename(html_path) == slug + ".preview.html"
-        else "应为 %s.preview.html" % slug)
+    add("P2", "R8 命名", r8_ok,
+        "" if r8_ok
+        else "应为 %s.view.<YYYYMMDD>.html" % slug)
     add("P3", "viewport 元信息",
         'name="viewport"' in text and "width=device-width" in text)
     add("P4", "移动端高度单位", "100dvh" in text, "缺 100dvh，移动端地址栏会吃内容")
@@ -101,8 +119,14 @@ def main(argv=None):
 
     block_fail = [c for c in checks if c[3] and not c[2]]
     warn_fail = [c for c in checks if not c[3] and not c[2]]
-    legacy = os.path.join(root, "preview.html")
-    legacy_hit = os.path.isfile(legacy) and os.path.abspath(legacy) != os.path.abspath(html_path)
+    legacy_paths = [
+        os.path.join(root, "preview.html"),
+        os.path.join(root, slug + ".preview.html"),
+    ]
+    legacy_hits = [
+        os.path.basename(p) for p in legacy_paths
+        if os.path.isfile(p) and os.path.abspath(p) != os.path.abspath(html_path)
+    ]
 
     print("Preview audit: %s  (%d pages, %.1f MB)" % (slug, n_page, size_mb))
     for pid, name, ok, block, detail in checks:
@@ -110,14 +134,14 @@ def main(argv=None):
             continue
         tag = "[BLOCK]" if block else "[WARN ]"
         print("  %s %-4s %-26s %s" % (tag, pid, name, detail))
-    if legacy_hit:
-        print("  [WARN ] P12  遗留裸 preview.html（R8 规定只提示不自动删）")
+    for legacy_name in legacy_hits:
+        print("  [WARN ] P12  遗留旧命名 %s（R8 已改用 <册目录名>.view.<YYYYMMDD>.html，只提示不自动删）" % legacy_name)
 
     if block_fail:
         print("\n[FAIL] %d 项阻断：预览器双端能力被削，按 PREVIEW_SPEC.md 修复后重跑。" % len(block_fail))
         print("       修复：改 build_preview.py 模板 → 重跑 build_preview.py → 再跑本脚本")
     else:
-        print("\n[PASS] 0 项阻断 —— 双端预览门禁通过（%d 项警告请人工判断）。" % (len(warn_fail) + (1 if legacy_hit else 0)))
+        print("\n[PASS] 0 项阻断 —— 双端预览门禁通过（%d 项警告请人工判断）。" % (len(warn_fail) + len(legacy_hits)))
 
     if args.json:
         out_dir = os.path.join(root, "validation")
