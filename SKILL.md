@@ -9,14 +9,17 @@ description: >
   orphan-free text wrapping, inner callout anti-occlusion bi-directional auto-fit with Z-Order
   zero-collision gate, code/pseudocode physical 4-space indentation with AST syntax, runtime
   name-resolution & image rId integrity gates, explicit 【练习】/【作业】/【测验】 badges on exercise
-  slides, and keyword-bold anchoring with single-x inline runs; every knowledge point rendered as a table +
-  runnable minimal demo + execution-order card, each followed by a 【练习】 page and its review page). Also ships the mandatory toolchain and pre-delivery
+  slides, keyword-bold anchoring with single-x inline runs, and OJ-style exercise pages (expected-output
+  terminal shown verbatim, never described in prose); every knowledge point rendered as a table +
+  runnable minimal demo + execution-order card, each followed by a 【练习】 page and its review page,
+  plus single-deliverable export (re-export overwrites `<deck-dir-name>.pptx`, no dated or versioned
+  backups). Also ships the mandatory toolchain and pre-delivery
   gate checklist: the SVG-layer layout audit gate (line-spacing overlap, in-card overflow, text
   collision, badge overflow) and the single-file preview builder that produces the delivered
   `<deck-dir-name>.preview.html` (filename must identify the deck — see red line R8; no port-based
   live preview; the on-page annotation server is optional and is never part of the delivery gate).
 metadata:
-  version: "2.8.0"
+  version: "2.9.0"
   author: "SuperRui0122"
   repository: "https://gitee.com/wang-changani/my-ppt-master"
   upstream: "https://github.com/hugohe3/ppt-master (MIT, Copyright (c) 2025-2026 Hugo He)"
@@ -469,6 +472,54 @@ python "{ROOT}/my-ppt-master/check_layout.py" "<project_path>" --json      # -> 
   - 练习页里塞参考实现，练习退化成抄写；
   - 知识点页只有文字卡（只答「是什么」），既无代码也无练习；
   - 同课两种等价语法，用了两套互不相干的版式。
+
+### 20. 练习页 OJ 化：输出样例直接给（OJ-Style Exercise Page, Show the Expected Output）
+
+- **核心定位（练习页 = 题目页，不是口头布置）**：洛谷 / LeetCode / PTA 上，学生看一道题先看「题目描述 → 输入样例 → 输出样例 → 样例说明 → 提示」，看完就知道跑成什么样算过。课件里的【练习】页必须同构：**把「期望输出」原样打在盘面上**，而不是用「会打印三行」「依次输出」去描述 —— 描述的练习页，学生写完不知道自己对不对，教师讲评时也无法逐行对齐。
+- **版式四块（固定位置，不得乱序）**：
+
+  | # | 区块 | 位置 | 内容与要求 |
+  |:--:|---|---|---|
+  | ① | 题目描述 | 左栏上卡「要做成什么样」 | 输入 → 输出 → **边界**三件事，只写目标、不写实现步骤 |
+  | ② | 提示 | 左栏下卡「写不出来时看这几条」 | ≤ 3 条，只给方向（用哪个条件 / 哪个更新），**不许给可抄代码** |
+  | ③ | 输出样例 | 右栏深色终端「期望输出 · 共 N 行」 | **逐字符完整、真机实跑**，含提示符、空行、结束语 |
+  | ④ | 样例说明 | 右栏终端下浅色卡「核对要点」 | 一句话点出最容易差的那一行（如「第 3 圈下面直接是第 5 圈」） |
+
+  - 底部保留一行「做完想一个问题」变式条；题干与样例之间不得留空白卡。
+
+- **五条铁律**：
+  1. **禁止描述代替样例**：「会打印三行」「依次输出 5、4、3」「屏幕上应该是……」一律不合格，必须给终端块；
+  2. **样例必须真机实跑**：不许手编、不许"应该长这样"；中文标点、空格、空行、`^C` 与 `Traceback` 原样照抄；
+  3. **样例可逐行核对**：终端标题写明行数（「共 6 行」），多一行少一行都算错；关键差异写进 ④ 核对要点；
+  4. **样例 ≠ 答案**：样例块只出现「屏幕结果」，不得含代码；参考实现另起讲评页（§17 三件套第 3 条）；
+  5. **交互题要区分人机**：`input()` / 菜单题的样例必须同时打出**提示符**与**用户输入内容**（如 `请输入编号 (0-1): 1`），否则学生分不清哪些字是自己敲的。
+- **门禁（可脚本判定）**：
+  1. 凡下行标题 `group(3)` 为 `【练习】` 的页面，必须存在输出样例终端块（内容层 `term` / 渲染层 `echo_panel`），否则**阻断**；
+  2. 终端标题必须含「期望输出」，并写明行数或「共 N 行」；
+  3. 反例扫描：练习页正文出现「会打印 / 依次输出 / 输出为 / 屏幕上应该 / 结果如下」而页内无终端块 → **阻断**；
+  4. 样例行数必须与其后讲评页参考实现的实际运行输出一致（同一段代码两处数字对不上，视同内容错误）。
+- **反例清单（出现任一条，视该练习页未完成）**：
+  - 练习页只有「目标卡 + 提示卡」，输出靠教师口头说；
+  - 用一行文字「输出：1 2 3」代替多行终端回显；
+  - 样例是手写的，与讲评页参考实现跑出来的不一样；
+  - 练习页里直接给出完整代码，练习退化成抄写。
+
+### 21. 导出产物唯一化：覆盖更新、不留历史版本（Single Deliverable, Overwrite on Re-export）
+
+- **核心定位（课件是活文档，PPTX 只是快照）**：每改一版就多一个带日期后缀的文件，三个月后没人分得清哪份是当堂用的。用户 2026-11-16 明确要求：**直接覆盖更新，不留以前的备份**。
+- **命名与路径**：`<project>/exports/<册目录名>.pptx` —— **一册一份、文件名固定**，`<册目录名>` 与预览产物同源（见 R8）。
+- **禁止清单（出现任一项即视为产物管理违规）**：
+  - 日期戳：`python-ch04_20261116.pptx`、`xxx_20261116_190755.pptx`；
+  - 版本号：`_v2` / `_v3` / `_final` / `_final2` / `_终版`；
+  - 备份后缀：`_backup` / `_bak` / `_旧` / `-副本` / ` (1)`；
+  - 把旧文件改名留存（挪进 `_archive/`、`.bak` 同样不允许）。
+- **历史版本由版本库负责**：已入库的册（`ppt-python-crawler`、`ppt-dsa-adult` 等）直接靠 git 历史回溯；未入库的册也不额外备份。
+- **重导流程（固定四步）**：
+  1. 直接覆盖导出到固定路径（导出器写同名文件即可，不新建）；
+  2. `ls <project>/exports/` 复核：**有且只有一个 `.pptx`**；
+  3. 旧产物若已入库，用 `git rm` 从索引删除，工作区不留副本；
+  4. CHANGELOG / 更新日志只记「文件名 + 页数 + 校验结论」，不记「又一个新文件名」。
+- **例外**：仅当用户当轮明确说「留一版对比 / 我要旧版」时才保留多份，并在回复里点明保留原因与文件名。
 
 ---
 

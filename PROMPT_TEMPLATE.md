@@ -2,7 +2,7 @@
 
 > 规约细节**不用写进提示词** —— `my-ppt-master` 里有完整规约（`RED_LINES.md` / `SKILL.md` / `AGENTS.md`），
 > agent 会自己读。提示词只需交代「做什么、源教案在哪」。
-> 最后更新：2026-10-27（同步 R4 单文件预览、R7 默认不产讲稿、R8 预览文件带册标识）
+> 最后更新：2026-11-16（SKILL §20 练习页 OJ 化：输出样例直接给；§21 导出产物唯一化：覆盖更新、不留备份）
 
 ## 短版（推荐，日常就用这个）
 
@@ -22,7 +22,7 @@
 
 ## 第一件事：加载规约（按优先级从高到低，全部读完再动手）
 1. `D:\南开\PPT-master\my-ppt-master\RED_LINES.md`            ← 用户红线 R1~R7，最高优先级
-2. `D:\南开\PPT-master\my-ppt-master\SKILL.md`                ← 教学排版 16 条规约
+2. `D:\南开\PPT-master\my-ppt-master\SKILL.md`                ← 教学排版 21 条规约
 3. `D:\南开\PPT-master\.workbuddy-ai\memory\MEMORY.md`        ← 本项目长期记忆（环境 / 约定 / 已知陷阱）
 4. `D:\南开\PPT-master\.workbuddy-ai\memory\<最新日期>.md`     ← 最近工作日志
 5. `D:\南开\PPT-master\ppt-master\skills\ppt-master\SKILL.md` 及 `workflows/generate-pptx.md` ← 上游默认流程
