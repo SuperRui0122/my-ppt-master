@@ -23,7 +23,7 @@ echo.
 if %RC% neq 0 (
   echo  [失败] 退出码 %RC% —— 请查看上面的错误信息。
 ) else (
-  echo  [完成] 各册目录下已生成「册名.view.YYYYMMDD.html」（如 mysql-adult-ch04_xxx.view.20261116.html），用浏览器打开即可翻页浏览。
+  echo  [完成] 各册目录下已生成「册短名.view.YYYYMMDD.html」（如 mysql-adult-ch04.view.20261116.html），用浏览器打开即可翻页浏览。
 )
 echo.
 pause

@@ -11,7 +11,7 @@
 ```text
 按 my-ppt-master 规约做大课【N】课件（先读 RED_LINES.md + SKILL.md + .workbuddy-ai/memory/MEMORY.md）。
 源教案：D:\南开\大数据技术备课系统\outputs\Python编程语言项目\课程实训手册\01_通讯录\课时【XX】_*.md
-参照 ch01 生成器体系复用。先出页面规划等我确认，再生成 SVG；只到 SVG + 质量门 + 单文件 `<册目录名>.view.<YYYYMMDD>.html`，严禁导出 PPTX，不要写讲稿。
+参照 ch01 生成器体系复用。先出页面规划等我确认，再生成 SVG；只到 SVG + 质量门 + 单文件 `<册短名>.view.<YYYYMMDD>.html`（新建目录不带 `_ppt169_YYYYMMDD`），严禁导出 PPTX，不要写讲稿。
 ```
 
 ## 详版（备用：换环境、首次协作、或 agent 没读懂短版时）
@@ -71,7 +71,7 @@
 3. AST 语法门禁（Python 代码过 AST，保 4 空格缩进）
 4. **双轨标题**：`... "<project>\generators\audit_titles.py" "<project>\svg_output"` ← ⚠️ 参数是 `svg_output` 目录，不是项目根
 5. **SVG 质量门**：`... "D:\南开\PPT-master\ppt-master\skills\ppt-master\scripts\svg_quality_checker.py" "<project>" --canonical-authoring --stage final --json`
-6. **预览（R4 + R8 · 只交单文件）**：`... "D:\南开\PPT-master\my-ppt-master\build_preview.py" "<project>"` → 产出 `<project>\<册目录名>.view.<YYYYMMDD>.html`（**文件名必须带册标识与日期后缀，禁止裸 `preview.html`**），向用户报告其**完整文件名 + 绝对路径**即算交付。**不启动端口服务，不读 `live_preview/lock.json`，禁止报告或编造端口 URL**
+6. **预览（R4 + R8 · 只交单文件）**：`... "D:\南开\PPT-master\my-ppt-master\build_preview.py" "<project>"` → 产出 `<project>\<册短名>.view.<YYYYMMDD>.html`（**自动剥离 `_ppt169_YYYYMMDD`，新建目录也不加此后缀，禁止裸 `preview.html`**），向用户报告其**完整文件名 + 绝对路径**即算交付。**不启动端口服务，不读 `live_preview/lock.json`，禁止报告或编造端口 URL**
    - 改动 `svg_output/` 后必须重跑第 5 步刷新 `validation/svg_quality_report.json`，否则导出器拒收
 
 ## 环境（固定用这两个）

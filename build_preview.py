@@ -16,9 +16,10 @@
     项目目录/notes/NN_slide.md    可选，逐页讲稿备注
     项目目录/design_spec.md       可选，用于提取册名与每页标题
 
-产出（**文件名必须带册标识与日期后缀，禁止统一叫 preview.html**）：
-    项目目录/<册目录名>.view.<YYYYMMDD>.html
-    例：mysql-adult-ch04_ppt169_20260905/mysql-adult-ch04_ppt169_20260905.view.20261116.html
+产出（**文件名必须带册短名与日期后缀，剥离 `_ppt169_YYYYMMDD`，禁止统一叫 preview.html**）：
+    项目目录/<册短名>.view.<YYYYMMDD>.html
+    例：mysql-adult-ch04/mysql-adult-ch04.view.20261116.html
+        （若旧目录名为 mysql-adult-ch04_ppt169_20260905，也自动输出 mysql-adult-ch04.view.20261116.html）
     理由：所有册都产出同名 preview.html，一旦被拷到同一处（下载目录、桌面、外发
     收件箱）就彻底分不清哪份是哪一册；加上日期后缀也便于区分不同审阅批次。
 
@@ -102,17 +103,29 @@ def find_decks(start: pathlib.Path, max_up: int = 8) -> list[pathlib.Path]:
 
 # Windows 文件名非法字符 + 控制字符
 _BAD_CHARS = re.compile(r'[<>:"/\\|?*\x00-\x1f]')
+# 上游目录尾缀（画布格式 + 8 位建册日期），生成文件名时统一剥离
+_CANVAS_DATE_SUFFIX = re.compile(
+    r"(?:_(?:ppt169|ppt43|xiaohongshu|moments|story|wechat|banner|a4))?(?:_\d{8})?$",
+    re.IGNORECASE,
+)
 
 
-def deck_slug(root: pathlib.Path) -> str:
-    """册标识：取册目录名，清洗成可安全用于文件名的字符串。"""
+def raw_deck_slug(root: pathlib.Path) -> str:
+    """清洗后的原始目录名（保留历史后缀，仅用于旧文件提醒）。"""
     slug = _BAD_CHARS.sub("_", root.name).strip().strip(".")
     slug = re.sub(r"\s+", "_", slug)
     return slug or "deck"
 
 
+def deck_slug(root: pathlib.Path) -> str:
+    """册短名：剥离尾部 `_ppt169_YYYYMMDD` / `_YYYYMMDD` / `_ppt169` 并清洗非法字符。"""
+    raw = raw_deck_slug(root)
+    short = _CANVAS_DATE_SUFFIX.sub("", raw).strip().strip(".")
+    return short or raw
+
+
 def preview_out(root: pathlib.Path, date_str: str | None = None) -> pathlib.Path:
-    """预览产物路径：<册目录名>.view.<YYYYMMDD>.html（禁止裸 preview.html）。"""
+    """预览产物路径：<册短名>.view.<YYYYMMDD>.html（禁止裸 preview.html）。"""
     tag = date_str or datetime.now().strftime("%Y%m%d")
     return root / f"{deck_slug(root)}.view.{tag}.html"
 
@@ -163,10 +176,12 @@ def build(root: pathlib.Path, title: str, *, quiet: bool = False) -> int:
     svg_dir = root / "svg_output"
     notes_dir = root / "notes"
     out = preview_out(root)
-    legacy_files = [
-        root / "preview.html",
-        root / f"{deck_slug(root)}.preview.html",
-    ]
+    raw = raw_deck_slug(root)
+    short = deck_slug(root)
+    legacy_names = ["preview.html", f"{short}.preview.html"]
+    if raw != short:
+        legacy_names.append(f"{raw}.preview.html")
+    legacy_files = [root / name for name in legacy_names]
 
     if not svg_dir.is_dir():
         print("找不到 svg_output 目录：%s" % svg_dir, file=sys.stderr)
@@ -248,7 +263,7 @@ def build(root: pathlib.Path, title: str, *, quiet: bool = False) -> int:
                  out.stat().st_size / 1024 / 1024, out.name))
     for legacy in legacy_files:
         if legacy.exists() and legacy != out:
-            print("    提示：仍存在旧命名 %s（已改用 <册目录名>.view.<YYYYMMDD>.html），可自行删除。"
+            print("    提示：仍存在旧命名 %s（已改用 <册短名>.view.<YYYYMMDD>.html），可自行删除。"
                   % legacy.name, file=sys.stderr)
     if missing:
         print("    警告：%d 处图片引用未找到 -> %s"

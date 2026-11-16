@@ -12,14 +12,14 @@ description: >
   slides, keyword-bold anchoring with single-x inline runs, and OJ-style exercise pages (expected-output
   terminal shown verbatim, never described in prose); every knowledge point rendered as a table +
   runnable minimal demo + execution-order card, each followed by a 【练习】 page and its review page,
-  plus single-deliverable export (re-export overwrites `<deck-dir-name>.pptx`, no dated or versioned
-  backups). Also ships the mandatory toolchain and pre-delivery
+  plus single-deliverable export (re-export overwrites `<deck-short-name>.pptx`, no dated or versioned
+  backups; new project directories use `<deck-short-name>` without `_ppt169_YYYYMMDD`). Also ships the mandatory toolchain and pre-delivery
   gate checklist: the SVG-layer layout audit gate (line-spacing overlap, in-card overflow, text
   collision, badge overflow) and the single-file preview builder that produces the delivered
-  `<deck-dir-name>.view.<YYYYMMDD>.html` (filename must identify the deck and build date — see red line R8; no port-based
+  `<deck-short-name>.view.<YYYYMMDD>.html` (filename strips `_ppt169_YYYYMMDD` and identifies the deck and build date — see red line R8; no port-based
   live preview; the on-page annotation server is optional and is never part of the delivery gate).
 metadata:
-  version: "2.10.0"
+  version: "2.11.0"
   author: "SuperRui0122"
   repository: "https://gitee.com/wang-changani/my-ppt-master"
   upstream: "https://github.com/hugohe3/ppt-master (MIT, Copyright (c) 2025-2026 Hugo He)"
@@ -372,13 +372,13 @@ metadata:
 
 | 脚本 | 用途 | 归属规约 |
 |---|---|---|
-| `build_preview.py` | 把 `<project>/svg_output/` 打包成**单文件** `<project>/<册目录名>.view.<YYYYMMDD>.html`（内联 84+ 页 SVG、图片转 base64 data URI、左缩略图 + `←/→` 翻页、零依赖）。用于向用户交付**真实可浏览**的预览，取代「用文字描述页面」 | 红线 R4（必须给真实预览地址）、R8（文件名带册标识与日期后缀） |
+| `build_preview.py` | 把 `<project>/svg_output/` 打包成**单文件** `<project>/<册短名>.view.<YYYYMMDD>.html`（自动剥离 `_ppt169_YYYYMMDD`；内联 84+ 页 SVG、图片转 base64 data URI、左缩略图 + `←/→` 翻页、零依赖）。用于向用户交付**真实可浏览**的预览，取代「用文字描述页面」 | 红线 R4（必须给真实预览地址）、R8（短名 + 日期后缀） |
 | `check_layout.py` | **SVG 层版式自审门禁**：四类检查（行距过密 / 卡内越界 / 文本互压 / 徽章越界），必须 `0 issues` 才放行 | §4、§9.3、§11.2、§13.1、§13.5 |
 | `check_preview.py` | **预览器双端门禁**：校验产物含 viewport / `100dvh` / 竖屏断点 / 横屏演示断点 / 抽屉遮罩 / 滑动翻页，且 R8 命名正确、页数与 `svg_output` 一致，必须 **0 阻断** 才放行。规范正文见 `my-ppt-master/PREVIEW_SPEC.md` | 红线 R4、R8；PREVIEW_SPEC.md §五 |
 | `svg_editor/server.py` | 启动**端口式 live preview**（本地 Flask + 交互 Web UI，可在页面上直接写批注、落到 `<project>/live_preview/annotations.jsonl`）。**2026-10-18 起已从交付门禁中移除**，仅在用户当轮明确要求实时批注时才使用 | 非门禁（可选工具） |
 
 ```bash
-python "{ROOT}/my-ppt-master/build_preview.py" "<project_path>"            # -> <project>/<册目录名>.view.<YYYYMMDD>.html
+python "{ROOT}/my-ppt-master/build_preview.py" "<project_path>"            # -> <project>/<册短名>.view.<YYYYMMDD>.html
 python "{ROOT}/my-ppt-master/check_layout.py" "<project_path>" --json      # -> validation/layout_audit.json
 ```
 
@@ -391,15 +391,15 @@ python "{ROOT}/my-ppt-master/check_layout.py" "<project_path>" --json      # -> 
 | 3 | AST 语法（§15.4） | 对课件中所有 Python 代码块执行 `ast.parse()` | 0 `SyntaxError` / 0 `IndentationError` |
 | 4 | 双行标题正则（§14.4 / §二.17） | 全课件双行页眉正则扫描；练习类页面另按 `^(\d+\.\d+)\.(\d+)(【(练习|作业|测验)】)?(.*)$` 取 `group(3)+group(5)` 计长 | 0 超长 / 0 破折号 / 0 断号 / 0 回跳 / 0 冲突；**标签+正文 ≤ 12 字**、0 标签缺失 |
 | 5 | **SVG 质量门** | `python "{SKILL_DIR}/scripts/svg_quality_checker.py" "<project>" --canonical-authoring --stage final --json` | 0 error（warning 需逐条评估） |
-| 6 | **预览交付（R4 · 单文件）** | `python "{ROOT}/my-ppt-master/build_preview.py" "<project>"` → `python "{ROOT}/my-ppt-master/check_preview.py" "<project>"` | 产出 `<project>/<册目录名>.view.<YYYYMMDD>.html`（**R8：必须带册标识与日期后缀，禁止裸 `preview.html`**），向用户报告其**完整文件名 + 绝对路径**；**`check_preview.py` 必须 0 阻断**（双端可用）。**不需要端口服务，禁止报告或编造端口 URL** |
+| 6 | **预览交付（R4 · 单文件）** | `python "{ROOT}/my-ppt-master/build_preview.py" "<project>"` → `python "{ROOT}/my-ppt-master/check_preview.py" "<project>"` | 产出 `<project>/<册短名>.view.<YYYYMMDD>.html`（**R8：自动剥离 `_ppt169_YYYYMMDD`，禁止裸 `preview.html`**），向用户报告其**完整文件名 + 绝对路径**；**`check_preview.py` 必须 0 阻断**（双端可用）。**不需要端口服务，禁止报告或编造端口 URL** |
 | 7 | 导出后净化（§6） | 解包校验 `ppt/slides/*.xml` 中 `<p:timing>` 与 `<p:transition>` 计数 | **均为 0** |
 | 8 | Z-Order 遮挡（§13.4） | OpenXML 图层碰撞扫描 | 0 Critical Occlusion |
 
 > **顺序说明**：第 2 步必须排在第 5 步之前。`svg_quality_checker.py` 只查画布级边界，若版式缺陷未被第 2 步拦下，它会全绿放行、缺陷一路跑到导出与用户眼前（2026-10-07 实际事故）。
 >
-> **第 6 步预览说明（2026-10-18 用户拍板：只保留单文件预览；2026-10-27 补 R8 命名规则；2026-11-16 改为 `.view.<YYYYMMDD>.html`）**：
+> **第 6 步预览说明（2026-10-18 用户拍板：只保留单文件预览；2026-10-27 补 R8 命名规则；2026-11-16 改为 `<册短名>.view.<YYYYMMDD>.html` 且新建目录不再带 `_ppt169_YYYYMMDD`）**：
 > - **单文件预览器（唯一交付形态）**：静态快照、离线可用、可外发、双击即看；含全部页面内联 SVG、图片 base64、左缩略图、`←/→` 翻页、`N` 切讲稿备注。**改动 `svg_output/` 或讲稿后必须重跑**，否则交付的是旧快照。
-> - **文件名必须带册标识与日期后缀（R8）**：产物为 `<册目录名>.view.<YYYYMMDD>.html`，例如 `mysql-adult-ch04_ppt169_20260905.view.20261116.html`。所有册统一叫 `preview.html` 时，一旦拷到同一目录就无法区分归属——报告与交付一律给完整文件名。
+> - **新建目录与文件短名（R8）**：今后新建项目目录直接使用 `<册短名>`（如 `mysql-adult-ch04/`），不再附带 `_ppt169_YYYYMMDD`；预览文件名为 `<册短名>.view.<YYYYMMDD>.html`，例如 `mysql-adult-ch04.view.20261116.html`（脚本对旧目录也会自动剥离 `_ppt169_YYYYMMDD`）。报告与交付一律给完整文件名。
 > - **双端可用（2026-10-29 用户拍板，规范见 `my-ppt-master/PREVIEW_SPEC.md`）**：同一份产物必须电脑、手机竖屏、手机横屏都能审课。桌面走原布局（**必须逐像素不变**）；`(max-width:820px), (pointer:coarse)` 命中时缩略图改抽屉、幻灯片满宽、底栏按钮 ≥84×44px、支持左右滑动与轻点放大；横屏再命中 `(orientation:landscape)` 时进入**演示模式**——隐藏顶栏底栏页码，幻灯片按 `100dvh` 撑满，只留左右两个圆形翻页键。**断点必须带 `pointer:coarse`**，否则 844px 宽的横屏手机会掉回桌面布局。改动后跑 `check_preview.py` 验证。
 > - **端口式 live preview 已废除**：原「双轨预览」要求（`svg_editor/server.py --live --timeout 0` + 读 `live_preview/lock.json` 的 URL）已于 2026-10-18 由用户本人撤销，理由是端口预览不好用（需常驻进程、URL 随进程回收失效、沙箱环境下经常起不来）。**不得再把起端口服务写进质量门清单，不得报告、更不得编造本地端口 URL。**
 > - **例外**：仅当用户当轮明确要求「实时批注 / 改完立刻看」时，才手动起 `server.py --live --timeout 0`，并如实说明它是否常驻；此路径**不影响交付判定**。
@@ -507,7 +507,7 @@ python "{ROOT}/my-ppt-master/check_layout.py" "<project_path>" --json      # -> 
 ### 21. 导出产物唯一化：覆盖更新、不留历史版本（Single Deliverable, Overwrite on Re-export）
 
 - **核心定位（课件是活文档，PPTX 只是快照）**：每改一版就多一个带日期后缀的文件，三个月后没人分得清哪份是当堂用的。用户 2026-11-16 明确要求：**直接覆盖更新，不留以前的备份**。
-- **命名与路径**：`<project>/exports/<册目录名>.pptx` —— **一册一份、文件名固定**，`<册目录名>` 与预览产物同源（见 R8）。
+- **命名与路径**：`<project>/exports/<册短名>.pptx` —— **一册一份、文件名固定**，`<册短名>` 与预览产物同源（不含 `_ppt169_YYYYMMDD`，见 R8）。
 - **禁止清单（出现任一项即视为产物管理违规）**：
   - 日期戳：`python-ch04_20261116.pptx`、`xxx_20261116_190755.pptx`；
   - 版本号：`_v2` / `_v3` / `_final` / `_final2` / `_终版`；

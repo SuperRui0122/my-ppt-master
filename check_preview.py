@@ -10,8 +10,8 @@
 
 检查项
 ------
-  P1  产物存在          <project>/<册目录名>.view.<YYYYMMDD>.html
-  P2  R8 命名            前缀等于册目录名（清洗后）且格式为 <册目录名>.view.<YYYYMMDD>.html
+  P1  产物存在          <project>/<册短名>.view.<YYYYMMDD>.html
+  P2  R8 命名            前缀等于册短名（已剥离 _ppt169_YYYYMMDD）且格式为 <册短名>.view.<YYYYMMDD>.html
   P3  viewport 元信息    width=device-width + viewport-fit=cover
   P4  移动端高度单位     100dvh（不是 100vh）
   P5  B 布局媒体查询     (max-width:820px), (pointer:coarse)
@@ -39,12 +39,22 @@ import re
 import sys
 
 BAD_CHARS = re.compile(r'[<>:"/\\|?*\x00-\x1f]')
+CANVAS_DATE_SUFFIX = re.compile(
+    r"(?:_(?:ppt169|ppt43|xiaohongshu|moments|story|wechat|banner|a4))?(?:_\d{8})?$",
+    re.IGNORECASE,
+)
 
 
-def deck_slug(root):
+def raw_deck_slug(root):
     slug = BAD_CHARS.sub("_", os.path.basename(os.path.abspath(root))).strip().strip(".")
     slug = re.sub(r"\s+", "_", slug)
     return slug or "deck"
+
+
+def deck_slug(root):
+    raw = raw_deck_slug(root)
+    short = CANVAS_DATE_SUFFIX.sub("", raw).strip().strip(".")
+    return short or raw
 
 
 def find_view_html(root, slug):
@@ -65,7 +75,7 @@ def find_view_html(root, slug):
 def main(argv=None):
     ap = argparse.ArgumentParser(description="单文件预览器双端门禁")
     ap.add_argument("directory", help="含 svg_output/ 的册目录")
-    ap.add_argument("--html", default=None, help="预览产物路径（默认 <册目录名>.view.<YYYYMMDD>.html）")
+    ap.add_argument("--html", default=None, help="预览产物路径（默认 <册短名>.view.<YYYYMMDD>.html）")
     ap.add_argument("--json", action="store_true", help="写 validation/preview_audit.json")
     args = ap.parse_args(argv)
 
@@ -119,10 +129,13 @@ def main(argv=None):
 
     block_fail = [c for c in checks if c[3] and not c[2]]
     warn_fail = [c for c in checks if not c[3] and not c[2]]
+    raw = raw_deck_slug(root)
     legacy_paths = [
         os.path.join(root, "preview.html"),
         os.path.join(root, slug + ".preview.html"),
     ]
+    if raw != slug:
+        legacy_paths.append(os.path.join(root, raw + ".preview.html"))
     legacy_hits = [
         os.path.basename(p) for p in legacy_paths
         if os.path.isfile(p) and os.path.abspath(p) != os.path.abspath(html_path)
@@ -135,7 +148,7 @@ def main(argv=None):
         tag = "[BLOCK]" if block else "[WARN ]"
         print("  %s %-4s %-26s %s" % (tag, pid, name, detail))
     for legacy_name in legacy_hits:
-        print("  [WARN ] P12  遗留旧命名 %s（R8 已改用 <册目录名>.view.<YYYYMMDD>.html，只提示不自动删）" % legacy_name)
+        print("  [WARN ] P12  遗留旧命名 %s（R8 已改用 <册短名>.view.<YYYYMMDD>.html，只提示不自动删）" % legacy_name)
 
     if block_fail:
         print("\n[FAIL] %d 项阻断：预览器双端能力被削，按 PREVIEW_SPEC.md 修复后重跑。" % len(block_fail))
