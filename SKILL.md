@@ -16,10 +16,10 @@ description: >
   backups; new project directories use `<deck-short-name>` without `_ppt169_YYYYMMDD`). Also ships the mandatory toolchain and pre-delivery
   gate checklist: the SVG-layer layout audit gate (line-spacing overlap, in-card overflow, text
   collision, badge overflow) and the single-file preview builder that produces the delivered
-  `<deck-short-name>.view.<YYYYMMDD>.html` (filename strips `_ppt169_YYYYMMDD` and identifies the deck and build date — see red line R8; no port-based
+  `<deck-short-name>.view.<YYYYMMDD>.html` (filename strips `_ppt169_YYYYMMDD`, identifies the deck and build date, and auto-removes older dated `.view.*.html` for the same deck with `git rm` when tracked — see red line R8 & §21; no port-based
   live preview; the on-page annotation server is optional and is never part of the delivery gate).
 metadata:
-  version: "2.11.0"
+  version: "2.12.0"
   author: "SuperRui0122"
   repository: "https://gitee.com/wang-changani/my-ppt-master"
   upstream: "https://github.com/hugohe3/ppt-master (MIT, Copyright (c) 2025-2026 Hugo He)"
@@ -372,9 +372,9 @@ metadata:
 
 | 脚本 | 用途 | 归属规约 |
 |---|---|---|
-| `build_preview.py` | 把 `<project>/svg_output/` 打包成**单文件** `<project>/<册短名>.view.<YYYYMMDD>.html`（自动剥离 `_ppt169_YYYYMMDD`；内联 84+ 页 SVG、图片转 base64 data URI、左缩略图 + `←/→` 翻页、零依赖）。用于向用户交付**真实可浏览**的预览，取代「用文字描述页面」 | 红线 R4（必须给真实预览地址）、R8（短名 + 日期后缀） |
+| `build_preview.py` | 把 `<project>/svg_output/` 打包成**单文件** `<project>/<册短名>.view.<YYYYMMDD>.html`（自动剥离 `_ppt169_YYYYMMDD`；内联 84+ 页 SVG、图片转 base64 data URI、左缩略图 + `←/→` 翻页、零依赖；写出新版后自动删除同册更早日期的 `.view.*.html` 并同步 `git rm`）。用于向用户交付**真实可浏览**的预览，取代「用文字描述页面」 | 红线 R4（必须给真实预览地址）、R8（短名 + 日期后缀 + 自动删旧）、§21 |
 | `check_layout.py` | **SVG 层版式自审门禁**：四类检查（行距过密 / 卡内越界 / 文本互压 / 徽章越界），必须 `0 issues` 才放行 | §4、§9.3、§11.2、§13.1、§13.5 |
-| `check_preview.py` | **预览器双端门禁**：校验产物含 viewport / `100dvh` / 竖屏断点 / 横屏演示断点 / 抽屉遮罩 / 滑动翻页，且 R8 命名正确、页数与 `svg_output` 一致，必须 **0 阻断** 才放行。规范正文见 `my-ppt-master/PREVIEW_SPEC.md` | 红线 R4、R8；PREVIEW_SPEC.md §五 |
+| `check_preview.py` | **预览器双端门禁**：校验产物含 viewport / `100dvh` / 竖屏断点 / 横屏演示断点 / 抽屉遮罩 / 滑动翻页，且 R8 命名正确、页数与 `svg_output` 一致、同册仅存最新一份 `.view.*.html`（P12），必须 **0 阻断** 才放行。规范正文见 `my-ppt-master/PREVIEW_SPEC.md` | 红线 R4、R8；PREVIEW_SPEC.md §五 |
 | `svg_editor/server.py` | 启动**端口式 live preview**（本地 Flask + 交互 Web UI，可在页面上直接写批注、落到 `<project>/live_preview/annotations.jsonl`）。**2026-10-18 起已从交付门禁中移除**，仅在用户当轮明确要求实时批注时才使用 | 非门禁（可选工具） |
 
 ```bash
@@ -397,9 +397,9 @@ python "{ROOT}/my-ppt-master/check_layout.py" "<project_path>" --json      # -> 
 
 > **顺序说明**：第 2 步必须排在第 5 步之前。`svg_quality_checker.py` 只查画布级边界，若版式缺陷未被第 2 步拦下，它会全绿放行、缺陷一路跑到导出与用户眼前（2026-10-07 实际事故）。
 >
-> **第 6 步预览说明（2026-10-18 用户拍板：只保留单文件预览；2026-10-27 补 R8 命名规则；2026-11-16 改为 `<册短名>.view.<YYYYMMDD>.html` 且新建目录不再带 `_ppt169_YYYYMMDD`）**：
+> **第 6 步预览说明（2026-10-18 用户拍板：只保留单文件预览；2026-10-27 补 R8 命名规则；2026-11-16 改为 `<册短名>.view.<YYYYMMDD>.html` 且新建目录不再带 `_ppt169_YYYYMMDD`；2026-11-23 改为生成新版后自动删掉同册更早日期的 `.view.*.html` 并同步 `git rm`）**：
 > - **单文件预览器（唯一交付形态）**：静态快照、离线可用、可外发、双击即看；含全部页面内联 SVG、图片 base64、左缩略图、`←/→` 翻页、`N` 切讲稿备注。**改动 `svg_output/` 或讲稿后必须重跑**，否则交付的是旧快照。
-> - **新建目录与文件短名（R8）**：今后新建项目目录直接使用 `<册短名>`（如 `mysql-adult-ch04/`），不再附带 `_ppt169_YYYYMMDD`；预览文件名为 `<册短名>.view.<YYYYMMDD>.html`，例如 `mysql-adult-ch04.view.20261116.html`（脚本对旧目录也会自动剥离 `_ppt169_YYYYMMDD`）。报告与交付一律给完整文件名。
+> - **新建目录、文件短名与自动删旧（R8 + §21）**：今后新建项目目录直接使用 `<册短名>`（如 `mysql-adult-ch04/`），不再附带 `_ppt169_YYYYMMDD`；预览文件名为 `<册短名>.view.<YYYYMMDD>.html`，例如 `mysql-adult-ch04.view.20261116.html`（脚本对旧目录也会自动剥离 `_ppt169_YYYYMMDD`）。写出新版后，`build_preview.py` 自动删除同册更早日期的 `.view.*.html`（Git 仓库内同步 `git rm`），每册只留最新一份；报告与交付一律给完整文件名。
 > - **双端可用（2026-10-29 用户拍板，规范见 `my-ppt-master/PREVIEW_SPEC.md`）**：同一份产物必须电脑、手机竖屏、手机横屏都能审课。桌面走原布局（**必须逐像素不变**）；`(max-width:820px), (pointer:coarse)` 命中时缩略图改抽屉、幻灯片满宽、底栏按钮 ≥84×44px、支持左右滑动与轻点放大；横屏再命中 `(orientation:landscape)` 时进入**演示模式**——隐藏顶栏底栏页码，幻灯片按 `100dvh` 撑满，只留左右两个圆形翻页键。**断点必须带 `pointer:coarse`**，否则 844px 宽的横屏手机会掉回桌面布局。改动后跑 `check_preview.py` 验证。
 > - **端口式 live preview 已废除**：原「双轨预览」要求（`svg_editor/server.py --live --timeout 0` + 读 `live_preview/lock.json` 的 URL）已于 2026-10-18 由用户本人撤销，理由是端口预览不好用（需常驻进程、URL 随进程回收失效、沙箱环境下经常起不来）。**不得再把起端口服务写进质量门清单，不得报告、更不得编造本地端口 URL。**
 > - **例外**：仅当用户当轮明确要求「实时批注 / 改完立刻看」时，才手动起 `server.py --live --timeout 0`，并如实说明它是否常驻；此路径**不影响交付判定**。
@@ -504,22 +504,28 @@ python "{ROOT}/my-ppt-master/check_layout.py" "<project_path>" --json      # -> 
   - 样例是手写的，与讲评页参考实现跑出来的不一样；
   - 练习页里直接给出完整代码，练习退化成抄写。
 
-### 21. 导出产物唯一化：覆盖更新、不留历史版本（Single Deliverable, Overwrite on Re-export）
+### 21. 导出与预览产物唯一化：覆盖 / 自动删旧、不留历史版本（Single Deliverable, Overwrite / Auto-Prune on Rebuild）
 
-- **核心定位（课件是活文档，PPTX 只是快照）**：每改一版就多一个带日期后缀的文件，三个月后没人分得清哪份是当堂用的。用户 2026-11-16 明确要求：**直接覆盖更新，不留以前的备份**。
-- **命名与路径**：`<project>/exports/<册短名>.pptx` —— **一册一份、文件名固定**，`<册短名>` 与预览产物同源（不含 `_ppt169_YYYYMMDD`，见 R8）。
-- **禁止清单（出现任一项即视为产物管理违规）**：
-  - 日期戳：`python-ch04_20261116.pptx`、`xxx_20261116_190755.pptx`；
-  - 版本号：`_v2` / `_v3` / `_final` / `_final2` / `_终版`；
-  - 备份后缀：`_backup` / `_bak` / `_旧` / `-副本` / ` (1)`；
-  - 把旧文件改名留存（挪进 `_archive/`、`.bak` 同样不允许）。
+- **核心定位（课件是活文档，PPTX 与 `.view` 预览都只是快照）**：每改一版就多留一个旧日期文件，几个月后目录里堆满过期副本。原则：**两类产物每册都只留最新一份，历史版本统一由 Git 负责回溯**。
+- **① 导出 PPTX（覆盖更新，无日期戳，2026-11-16 确立）**：
+  - **命名与路径**：`<project>/exports/<册短名>.pptx` —— **一册一份、文件名固定**，`<册短名>` 与预览产物同源（不含 `_ppt169_YYYYMMDD`，见 R8）。
+  - **禁止清单（出现任一项即视为产物管理违规）**：
+    - 日期戳：`python-ch04_20261116.pptx`、`xxx_20261116_190755.pptx`；
+    - 版本号：`_v2` / `_v3` / `_final` / `_final2` / `_终版`；
+    - 备份后缀：`_backup` / `_bak` / `_旧` / `-副本` / ` (1)`；
+    - 把旧文件改名留存（挪进 `_archive/`、`.bak` 同样不允许）。
+  - **重导流程（固定四步）**：
+    1. 直接覆盖导出到固定路径（导出器写同名文件即可，不新建）；
+    2. `ls <project>/exports/` 复核：**有且只有一个 `.pptx`**；
+    3. 旧产物若已入库，用 `git rm` 从索引删除，工作区不留副本；
+    4. CHANGELOG / 更新日志只记「文件名 + 页数 + 校验结论」，不记「又一个新文件名」。
+- **② 单文件预览 `.view`（保留日期，自动删旧，2026-11-23 确立）**：
+  - **命名与路径**：`<project>/<册短名>.view.<YYYYMMDD>.html` —— 保留 `<YYYYMMDD>` 便于外发或审课时一眼看出快照日期；
+  - **自动清理**：`build_preview.py` 在写出新版成功后，自动删除同册更早日期的 `<册短名>.view.<YYYYMMDD>.html`（以及旧目录前缀 `<原目录名>.view.<YYYYMMDD>.html`）；若旧文件已被 Git 跟踪，同步执行 `git rm` 暂存删除，精准不误删派生册（如 `<册短名>-student.view.*.html`）；
+  - **门禁兜底**：`check_preview.py` P12 检查同册不得残留多个日期的 `.view.*.html`；
+  - **历史旧命名**：遗留的 `preview.html` / `*.preview.html` 仍仅提示不自动删（见 R8 第 6 条）。
 - **历史版本由版本库负责**：已入库的册（`ppt-python-crawler`、`ppt-dsa-adult` 等）直接靠 git 历史回溯；未入库的册也不额外备份。
-- **重导流程（固定四步）**：
-  1. 直接覆盖导出到固定路径（导出器写同名文件即可，不新建）；
-  2. `ls <project>/exports/` 复核：**有且只有一个 `.pptx`**；
-  3. 旧产物若已入库，用 `git rm` 从索引删除，工作区不留副本；
-  4. CHANGELOG / 更新日志只记「文件名 + 页数 + 校验结论」，不记「又一个新文件名」。
-- **例外**：仅当用户当轮明确说「留一版对比 / 我要旧版」时才保留多份，并在回复里点明保留原因与文件名。
+- **例外**：仅当用户当轮明确说「留一版对比 / 我要旧版」时才保留多份（预览构建加 `--keep-old`，校验加 `--allow-multiple`），并在回复里点明保留原因与文件名。
 
 ---
 

@@ -72,7 +72,7 @@ python "{ROOT}/my-ppt-master/build_preview.py" <project_path>
 **R8 — 工程目录与产物一律使用短名，禁止附带 `_ppt169_YYYYMMDD`；预览文件固定为 `<册短名>.view.<YYYYMMDD>.html`。**
 
 1. **新建工程目录（含 `init` / 手建）**：一律直接使用 **`<册短名>`**（如 `mysql-adult-ch04`、`python-ch02`），**禁止再追加 `_ppt169` 与 `_YYYYMMDD` 后缀**（如 `mysql-adult-ch04_ppt169_20260905`）。若上游 `project_utils.py` 仅因目录名不含 `_YYYYMMDD` 给出 non-blocking 警告，直接忽略（以本红线为准）；已有历史目录保持现状，不强行改名；
-2. **预览文件名**：`build_preview.py` 的产物固定命名为 **`<册短名>.view.<YYYYMMDD>.html`**（当天重复生成覆盖同日文件，不同日期保留各自快照），落在该册目录下：
+2. **预览文件名与自动删旧**：`build_preview.py` 的产物固定命名为 **`<册短名>.view.<YYYYMMDD>.html`**（保留日期以便一眼辨识快照时间），落在该册目录下；**每册只留最新一份**——当天重复生成覆盖同日文件，跨日生成新版成功后自动删除同册更早日期的 `.view.*.html`（若已被 Git 跟踪则同步执行 `git rm`，历史版本由 Git 负责回溯；仅当用户明说留旧版对比时加 `--keep-old`）：
 
 ```
 projects/数据库-成人专科/mysql-adult-ch04/
@@ -83,9 +83,9 @@ projects/数据库-成人专科/mysql-adult-ch04/
 3. **导出 PPTX 同源**：见 `SKILL.md` §21，导出产物固定为 `<project>/exports/<册短名>.pptx`，同样不带 `_ppt169_YYYYMMDD` 与导出日期戳；
 4. **名字必须能反查出是哪一册与哪一天生成的预览**：禁止 `preview.html`、`preview2.html`、`预览.html`、`最终版.html`；报告时给**完整文件名 + 绝对路径**；
 5. `--all` 批量同理：每册各得一个 `<册短名>.view.<YYYYMMDD>.html`，互不覆盖；非法字符（`< > : " / \ | ? *`）与空白由脚本清洗为 `_`，剥离尾部 `_ppt169`/`_ppt43`/`_YYYYMMDD` 后若为空则退回原目录名或 `deck`；
-6. **由脚本强制实现，不靠人工记忆**。若发现某处仍产出裸 `preview.html` 或未更新的旧 `<册名>.preview.html`，视为 `build_preview.py` 被改坏，先修脚本再交付；发现历史遗留的 `preview.html` / `*.preview.html` 时脚本只提示，**不自动删除**。
+6. **由脚本强制实现，不靠人工记忆**。若发现某处仍产出裸 `preview.html` 或未更新的旧 `<册名>.preview.html`，视为 `build_preview.py` 被改坏，先修脚本再交付；同册更早日期的 `.view.<YYYYMMDD>.html` 由 `build_preview.py` 在写出新版后自动清理（Git 仓库内同步 `git rm`），并由 `check_preview.py` P12 兜底校验；发现历史旧命名 `preview.html` / `*.preview.html` 时脚本仍只提示、**不自动删除**。
 
-> 改写记录：2026-10-27 由用户本人要求新增（初版 `<册目录名>.preview.html`）；2026-11-16 精简后缀为 `.view.<YYYYMMDD>.html`；同日用户进一步确认去掉 `_ppt169` 与建册日期 `_YYYYMMDD`，新建目录与预览/导出前缀统一用 `<册短名>`。
+> 改写记录：2026-10-27 由用户本人要求新增（初版 `<册目录名>.preview.html`）；2026-11-16 精简后缀为 `.view.<YYYYMMDD>.html`；同日用户进一步确认去掉 `_ppt169` 与建册日期 `_YYYYMMDD`，新建目录与预览/导出前缀统一用 `<册短名>`；2026-11-23 用户确认采用「保留日期 + 自动删旧」策略——生成新版后自动删除同册更早日期的 `.view.*.html`（并同步 `git rm`），每册只留最新一份。
 
 ---
 

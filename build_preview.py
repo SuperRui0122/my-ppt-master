@@ -10,18 +10,21 @@
     python build_preview.py --all                    # 批量处理 projects/ 下所有册
     python build_preview.py <项目目录> --open         # 生成后打开浏览器
     python build_preview.py <项目目录> --title "册名"  # 手动指定册名
+    python build_preview.py <项目目录> --keep-old     # 保留同册更早日期的旧预览（默认自动清理）
 
 约定（缺省项可不存在）：
     项目目录/svg_output/*.svg     必需，文件名形如 01_cover.svg（数字前缀决定页序）
     项目目录/notes/NN_slide.md    可选，逐页讲稿备注
     项目目录/design_spec.md       可选，用于提取册名与每页标题
 
-产出（**文件名必须带册短名与日期后缀，剥离 `_ppt169_YYYYMMDD`，禁止统一叫 preview.html**）：
+产出（**文件名必须带册短名与日期后缀，剥离 `_ppt169_YYYYMMDD`，每册只留最新一份**）：
     项目目录/<册短名>.view.<YYYYMMDD>.html
     例：mysql-adult-ch04/mysql-adult-ch04.view.20261116.html
         （若旧目录名为 mysql-adult-ch04_ppt169_20260905，也自动输出 mysql-adult-ch04.view.20261116.html）
     理由：所有册都产出同名 preview.html，一旦被拷到同一处（下载目录、桌面、外发
-    收件箱）就彻底分不清哪份是哪一册；加上日期后缀也便于区分不同审阅批次。
+    收件箱）就彻底分不清哪份是哪一册；加上日期后缀可一眼看出快照时间。同时每次生成
+    新版成功后，脚本会自动删除同册更早日期的 `.view.*.html`（若已被 Git 跟踪则同步
+    执行 `git rm`，历史版本由 Git 负责回溯），避免同一册堆积多个过时预览。
 
 为什么做成「自包含单文件」：
     不能简单用 <img src="svg_output/01.svg"> 引用 —— SVG 内部的
@@ -46,6 +49,7 @@ from datetime import datetime
 import json
 import pathlib
 import re
+import subprocess
 import sys
 import webbrowser
 
@@ -130,6 +134,84 @@ def preview_out(root: pathlib.Path, date_str: str | None = None) -> pathlib.Path
     return root / f"{deck_slug(root)}.view.{tag}.html"
 
 
+def _is_git_tracked(root: pathlib.Path, fname: str) -> bool:
+    """检查文件是否已被所在 Git 仓库跟踪。"""
+    try:
+        proc = subprocess.run(
+            ["git", "-C", str(root), "ls-files", "--error-unmatch", "--", fname],
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+        return proc.returncode == 0
+    except (OSError, subprocess.TimeoutExpired):
+        return False
+
+
+def cleanup_old_views(
+    root: pathlib.Path,
+    current_out: pathlib.Path,
+    current_date: str,
+) -> list[tuple[str, bool, str]]:
+    """删除同册更早日期的 .view.<YYYYMMDD>.html（被 Git 跟踪时同步 git rm）。
+
+    只精准匹配本册短名（及历史带后缀原名）的日期快照，不触碰子目录或派生册
+    （如 `<short>-student.view.*.html`），也不删除历史旧命名 `*.preview.html`。
+    返回 [(文件名, 是否执行了 git rm, 备注), ...]。
+    """
+    short = deck_slug(root)
+    raw = raw_deck_slug(root)
+    short_re = re.compile(re.escape(short) + r"\.view\.(\d{8})\.html$")
+    raw_re = (
+        re.compile(re.escape(raw) + r"\.view\.(\d{8})\.html$")
+        if raw != short
+        else None
+    )
+
+    out_resolved = current_out.resolve()
+    stale: list[pathlib.Path] = []
+    for entry in sorted(root.iterdir(), key=lambda p: p.name):
+        if not entry.is_file():
+            continue
+        if entry.resolve() == out_resolved:
+            continue
+        m_short = short_re.fullmatch(entry.name)
+        if m_short and m_short.group(1) < current_date:
+            stale.append(entry)
+            continue
+        if raw_re is not None:
+            m_raw = raw_re.fullmatch(entry.name)
+            if m_raw and m_raw.group(1) <= current_date:
+                stale.append(entry)
+
+    removed: list[tuple[str, bool, str]] = []
+    for old_path in stale:
+        fname = old_path.name
+        if _is_git_tracked(root, fname):
+            try:
+                proc = subprocess.run(
+                    ["git", "-C", str(root), "rm", "-q", "-f", "--", fname],
+                    capture_output=True,
+                    text=True,
+                    encoding="utf-8",
+                    errors="replace",
+                    timeout=10,
+                )
+                if proc.returncode == 0:
+                    removed.append((fname, True, ""))
+                    continue
+                err = (proc.stderr or proc.stdout).strip().splitlines()
+                note = f"git rm 失败（{err[-1] if err else 'unknown'}），已仅从磁盘删除"
+            except (OSError, subprocess.TimeoutExpired) as exc:
+                note = f"git rm 异常（{exc}），已仅从磁盘删除"
+            old_path.unlink(missing_ok=True)
+            removed.append((fname, False, note))
+        else:
+            old_path.unlink(missing_ok=True)
+            removed.append((fname, False, ""))
+    return removed
+
+
 # ------------------------------------------------------------------ 元数据
 
 def guess_title(root: pathlib.Path) -> str:
@@ -172,10 +254,17 @@ def load_note(notes_dir: pathlib.Path, page_no: int) -> str:
 
 # ------------------------------------------------------------------ 构建
 
-def build(root: pathlib.Path, title: str, *, quiet: bool = False) -> int:
+def build(
+    root: pathlib.Path,
+    title: str,
+    *,
+    quiet: bool = False,
+    keep_old: bool = False,
+) -> int:
     svg_dir = root / "svg_output"
     notes_dir = root / "notes"
-    out = preview_out(root)
+    date_tag = datetime.now().strftime("%Y%m%d")
+    out = preview_out(root, date_tag)
     raw = raw_deck_slug(root)
     short = deck_slug(root)
     legacy_names = ["preview.html", f"{short}.preview.html"]
@@ -261,6 +350,16 @@ def build(root: pathlib.Path, title: str, *, quiet: bool = False) -> int:
         print("  %-40s %3d 页  %5.1f MB  -> %s"
               % (root.name[:40], len(pages),
                  out.stat().st_size / 1024 / 1024, out.name))
+    if not keep_old:
+        removed = cleanup_old_views(root, out, date_tag)
+        if not quiet:
+            for fname, git_rm_ok, note in removed:
+                if git_rm_ok:
+                    print("    清理旧版：%s（已同步 git rm）" % fname)
+                elif note:
+                    print("    清理旧版：%s（%s）" % (fname, note), file=sys.stderr)
+                else:
+                    print("    清理旧版：%s" % fname)
     for legacy in legacy_files:
         if legacy.exists() and legacy != out:
             print("    提示：仍存在旧命名 %s（已改用 <册短名>.view.<YYYYMMDD>.html），可自行删除。"
@@ -813,6 +912,8 @@ def main(argv: list[str] | None = None) -> int:
                     help="批量处理 projects/ 下所有含 svg_output/ 的册")
     ap.add_argument("--title", default=None, help="预览器左上角册名")
     ap.add_argument("--open", action="store_true", help="生成后用默认浏览器打开")
+    ap.add_argument("--keep-old", action="store_true",
+                    help="保留同册更早日期的 .view.*.html（默认自动删除并同步 git rm）")
     args = ap.parse_args(argv)
 
     start = pathlib.Path(args.directory).resolve() if args.directory else pathlib.Path.cwd()
@@ -825,7 +926,7 @@ def main(argv: list[str] | None = None) -> int:
         print("批量生成 %d 册预览：" % len(decks))
         rc = 0
         for deck in decks:
-            rc |= build(deck, args.title or guess_title(deck), quiet=False)
+            rc |= build(deck, args.title or guess_title(deck), quiet=False, keep_old=args.keep_old)
         print("完成。")
         return rc
 
@@ -839,7 +940,7 @@ def main(argv: list[str] | None = None) -> int:
 
     title = args.title or guess_title(root)
     print("册名：%s" % title)
-    code = build(root, title, quiet=False)
+    code = build(root, title, quiet=False, keep_old=args.keep_old)
     if code == 0:
         out = preview_out(root)
         print("输出：%s" % out)

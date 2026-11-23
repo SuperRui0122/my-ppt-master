@@ -91,8 +91,8 @@ python build_preview.py <册目录> --open           # 生成指定册并打开�
 ```
 
 > 💡 **看课件效果别再用文件管理器逐页点开 SVG。** 双击 `preview.bat`，它会为 `ppt-master/projects` 下每一册生成一个 `<册短名>.view.<YYYYMMDD>.html`（单文件、含全部图片、可直接拷给别人）。打开后用 `←` `→` 翻页、`S` 看缩略图、`N` 对着讲稿备注备课。
-> **短名 + 日期后缀（R8，2026-11-16 确立）**：例如 `mysql-adult-ch04.view.20261116.html`。新建工程目录不再带 `_ppt169_YYYYMMDD`，脚本遇到旧目录名也会自动剥离 `_ppt169_YYYYMMDD`，只保留清晰的册名与生成日期。
-> 注意：该 `.view.<YYYYMMDD>.html` 文件是**快照**，改完 SVG 或讲稿后要重跑一次才会刷新（同日运行会覆盖当天文件）。
+> **短名 + 日期后缀 + 自动删旧（R8 + §21，2026-11-23 更新）**：例如 `mysql-adult-ch04.view.20261116.html`。新建工程目录不再带 `_ppt169_YYYYMMDD`，脚本遇到旧目录名也会自动剥离 `_ppt169_YYYYMMDD`，只保留清晰的册名与生成日期。
+> 注意：该 `.view.<YYYYMMDD>.html` 文件是**快照**，改完 SVG 或讲稿后要重跑一次才会刷新——同日运行覆盖当天文件，跨日生成新版后自动删除同册更早日期的 `.view.*.html`（若已被 Git 跟踪则同步 `git rm`，如需保留旧版对比可加 `--keep-old`）。
 >
 > ⚠️ **2026-10-18 起只保留这一种预览。** 原先的端口式 live preview（`svg_editor/server.py` + `live_preview/lock.json` 里的 URL）由用户本人要求废除，理由是端口预览需要常驻进程、URL 随进程回收失效、不好用。现在 R4 只要求产出单文件预览并报告路径；`live_preview.bat` 及各册的 `live_preview/` 运行时目录已一并删除，仓库里不再保留任何实时预览入口。
 

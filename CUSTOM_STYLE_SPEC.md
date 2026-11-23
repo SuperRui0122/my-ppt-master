@@ -357,7 +357,7 @@ v1.x 的 `SKILL.md` 与 `CUSTOM_STYLE_SPEC.md` 有约 90% 内容重复，且已�
 | R5 | 确认门不得代签 | 用户沉默 ≠ 确认；代为决策必须显著标注 |
 | R6 | 考核内容忠于源文档 | 禁止编造考试形式、评分标准、学分政策 |
 | R7 | 默认不产讲稿 | 默认不产出逐页口播讲稿 / 演讲者备注 / 任何独立讲稿文件；只有用户在本轮明确说「要讲稿 / 演讲稿 / 备注 / 口播稿」才写 |
-| R8 | 目录与产物统一用短名 | 新建目录不再加 `_ppt169_YYYYMMDD`；预览固定 `<册短名>.view.<YYYYMMDD>.html`，脚本自动剥离旧目录后缀；报告须给完整文件名 + 绝对路径 |
+| R8 | 目录与产物统一用短名 | 新建目录不再加 `_ppt169_YYYYMMDD`；预览固定 `<册短名>.view.<YYYYMMDD>.html`，自动剥离旧目录后缀，跨日生成后自动删同册旧日期 `.view.*.html`（同步 `git rm`）；报告须给完整文件名 + 绝对路径 |
 
 ### 8.2 教学排版与动效规约（正文见 [`SKILL.md`](./SKILL.md)）
 
@@ -385,6 +385,7 @@ v1.x 的 `SKILL.md` 与 `CUSTOM_STYLE_SPEC.md` 有约 90% 内容重复，且已�
 
 | 版本 | 日期 | 变更 |
 |---|---|---|
+| v2.12.0 | 2026-11-23 | **预览保留日期 + 自动删旧（用户拍板方案 A）**：保留 `<册短名>.view.<YYYYMMDD>.html` 日期后缀以便辨识快照时间，但每册只留最新一份——`build_preview.py` 新增 `cleanup_old_views()`（写出新版后自动删除同册更早日期的 `.view.*.html` 及旧前缀日期文件，若已被 Git 跟踪则同步执行 `git rm`，精准不误删派生册；支持 `--keep-old` 保留对比）；`check_preview.py` 新增 P12「每册唯一预览」校验（支持 `--allow-multiple`），遗留 `*.preview.html` 告警顺延至 P13。同步更新 `RED_LINES.md` R8、`SKILL.md`（升至 `2.12.0`，§16 与 §21 纳入预览唯一化）、`AGENTS.md`、`PREVIEW_SPEC.md`（v1.2）、`README.md`、`CUSTOM_STYLE_SPEC.md` |
 | v2.11.0 | 2026-11-16 | **R8 去 `_ppt169_YYYYMMDD` 统一短名（用户本人要求）**：新建工程目录直接使用 `<册短名>`（如 `mysql-adult-ch04`），不再追加 `_ppt169` 与建册日期 `_YYYYMMDD`；预览与导出前缀统一改为 `<册短名>`（`build_preview.py` / `check_preview.py` 新增 `raw_deck_slug()` 并更新 `deck_slug()` 自动剥离尾部画布与建册日期后缀，产出 `<册短名>.view.<YYYYMMDD>.html`；旧目录保持现状不强改）。同步更新 `RED_LINES.md` R4/R8、`SKILL.md`（升至 `2.11.0`）、`AGENTS.md`、`PREVIEW_SPEC.md`、`preview.bat`、`apply.py`、`PROMPT_TEMPLATE.md`、`README.md`、`CUSTOM_STYLE_SPEC.md` |
 | v2.10.0 | 2026-11-16 | **R8 命名精简并加日期后缀（用户本人要求）**：单文件预览器产物文件名由 `<册目录名>.preview.html` 改为 **`<册目录名>.view.<YYYYMMDD>.html`**（当天重复生成覆盖同日文件，不同日期保留各自快照）。`build_preview.py` 更新 `preview_out()` 与旧文件提示；`check_preview.py` 更新默认查找逻辑与 P2 R8 正则校验（并保留旧 `preview.html` / `<册目录名>.preview.html` 仅提示不自动删）；同步更新 `RED_LINES.md` R4/R8、`SKILL.md`、`AGENTS.md`、`PREVIEW_SPEC.md`、`preview.bat`、`apply.py`、`PROMPT_TEMPLATE.md`、`README.md`、`CUSTOM_STYLE_SPEC.md` |
 | v2.4.0 | 2026-10-27 | **新增 R8（用户本人要求）**：预览产物文件名必须带册标识，固定为 `<册目录名>.preview.html`；起因是所有册统一产出 `preview.html`，拷到同一目录后无法区分归属。`build_preview.py` 新增 `preview_out()` / `deck_slug()`（非法字符清洗），`build()` 与 CLI 输出均改用新名，并对历史遗留的裸 `preview.html` 给出提示（不自动删除）。同步改写 `RED_LINES.md` R4/R8、`AGENTS.md` 闸门②、`SKILL.md` §16 工具表 + 第 6 步 + front matter、`README.md`、`PROMPT_TEMPLATE.md`、`preview.bat` 提示语 |

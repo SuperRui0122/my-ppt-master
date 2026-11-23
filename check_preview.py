@@ -21,12 +21,15 @@
   P9  页数一致           data:image/svg+xml 计数 == svg_output/*.svg 数
   P10 桌面元素未丢       <header> / <footer> / id="side" / id="btnFit"
   P11 体积阈值           >25 MB 给 WARN（手机加载慢，但不阻断）
+  P12 每册唯一预览       同册不得残留更早日期的 .view.<YYYYMMDD>.html（可用 --allow-multiple 放行）
+  P13 遗留旧命名         preview.html / *.preview.html 仅给 WARN，不自动删
 
 用法
 ----
     python check_preview.py <project_path>
     python check_preview.py <project_path> --json     # 写 validation/preview_audit.json
     python check_preview.py <project_path> --html <file>   # 指定产物（默认按 R8 推导）
+    python check_preview.py <project_path> --allow-multiple  # 刻意留旧版对比时放行 P12
 
 退出码：0 = 通过；1 = 存在阻断项；2 = 用法/路径错误。
 """
@@ -57,17 +60,29 @@ def deck_slug(root):
     return short or raw
 
 
-def find_view_html(root, slug):
-    pattern = re.compile(re.escape(slug) + r"\.view\.(\d{8})\.html$")
+def find_view_htmls(root, slug, raw=None):
+    """查找同册全部 .view.<YYYYMMDD>.html（含历史带后缀前缀），按日期降序返回 [(date, path), ...]。"""
+    patterns = [re.compile(re.escape(slug) + r"\.view\.(\d{8})\.html$")]
+    if raw and raw != slug:
+        patterns.append(re.compile(re.escape(raw) + r"\.view\.(\d{8})\.html$"))
     matches = []
+    seen = set()
     for fname in os.listdir(root):
-        m = pattern.fullmatch(fname)
-        if m:
-            path = os.path.join(root, fname)
-            if os.path.isfile(path):
-                matches.append((m.group(1), path))
+        for pat in patterns:
+            m = pat.fullmatch(fname)
+            if m:
+                path = os.path.join(root, fname)
+                if os.path.isfile(path) and path not in seen:
+                    seen.add(path)
+                    matches.append((m.group(1), path))
+                break
+    matches.sort(key=lambda item: (item[0], os.path.basename(item[1])), reverse=True)
+    return matches
+
+
+def find_view_html(root, slug):
+    matches = find_view_htmls(root, slug)
     if matches:
-        matches.sort(key=lambda item: item[0], reverse=True)
         return matches[0][1]
     return os.path.join(root, "%s.view.%s.html" % (slug, datetime.now().strftime("%Y%m%d")))
 
@@ -77,6 +92,8 @@ def main(argv=None):
     ap.add_argument("directory", help="含 svg_output/ 的册目录")
     ap.add_argument("--html", default=None, help="预览产物路径（默认 <册短名>.view.<YYYYMMDD>.html）")
     ap.add_argument("--json", action="store_true", help="写 validation/preview_audit.json")
+    ap.add_argument("--allow-multiple", action="store_true",
+                    help="允许同册并存多个日期的 .view.*.html（仅限刻意留旧版对比）")
     args = ap.parse_args(argv)
 
     root = os.path.abspath(args.directory)
@@ -86,7 +103,9 @@ def main(argv=None):
         return 2
 
     slug = deck_slug(root)
-    html_path = args.html or find_view_html(root, slug)
+    raw = raw_deck_slug(root)
+    all_views = find_view_htmls(root, slug, raw)
+    html_path = args.html or (all_views[0][1] if all_views else find_view_html(root, slug))
     if not os.path.isfile(html_path):
         print("[FAIL] P1 产物不存在：%s" % html_path, file=sys.stderr)
         print("       先跑：python build_preview.py \"%s\"" % root, file=sys.stderr)
@@ -127,9 +146,17 @@ def main(argv=None):
     add("P11", "体积阈值", size_mb <= 25.0,
         "%.1f MB，手机加载偏慢（建议压缩图片或分册）" % size_mb, block=False)
 
+    stale_views = [
+        os.path.basename(p) for _, p in all_views
+        if os.path.abspath(p) != os.path.abspath(html_path)
+    ]
+    add("P12", "每册唯一预览", not stale_views,
+        "残留旧版 %s（重跑 build_preview.py 自动清理或手动 git rm；刻意留对比加 --allow-multiple）"
+        % ", ".join(stale_views),
+        block=not args.allow_multiple)
+
     block_fail = [c for c in checks if c[3] and not c[2]]
     warn_fail = [c for c in checks if not c[3] and not c[2]]
-    raw = raw_deck_slug(root)
     legacy_paths = [
         os.path.join(root, "preview.html"),
         os.path.join(root, slug + ".preview.html"),
@@ -148,7 +175,7 @@ def main(argv=None):
         tag = "[BLOCK]" if block else "[WARN ]"
         print("  %s %-4s %-26s %s" % (tag, pid, name, detail))
     for legacy_name in legacy_hits:
-        print("  [WARN ] P12  遗留旧命名 %s（R8 已改用 <册短名>.view.<YYYYMMDD>.html，只提示不自动删）" % legacy_name)
+        print("  [WARN ] P13  遗留旧命名 %s（R8 已改用 <册短名>.view.<YYYYMMDD>.html，只提示不自动删）" % legacy_name)
 
     if block_fail:
         print("\n[FAIL] %d 项阻断：预览器双端能力被削，按 PREVIEW_SPEC.md 修复后重跑。" % len(block_fail))

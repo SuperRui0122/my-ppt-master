@@ -1,6 +1,6 @@
 # PREVIEW_SPEC.md — 单文件预览器双端规范
 
-> 版本 v1.1 · 2026-11-12 更新 · 维护者：SuperRui0122
+> 版本 v1.2 · 2026-11-23 更新 · 维护者：SuperRui0122
 > 对应实现：`my-ppt-master/build_preview.py`（模板内建，所有册自动继承）
 > 对应门禁：`my-ppt-master/check_preview.py`
 > 上位约束：红线 **R4**（预览只走单文件）、**R8**（文件名带册标识）
@@ -112,7 +112,7 @@ python my-ppt-master/check_preview.py <project_path> --json   # 写 validation/p
 
 退出码：`0` 通过 / `1` 存在阻断项 / `2` 用法错误。
 
-检查项：产物存在、R8 命名、viewport、`100dvh`、B 布局媒体查询、C 布局媒体查询、`#backdrop`、触摸滑动、页数与 `svg_output` 一致、桌面关键元素未丢、体积阈值。
+检查项：产物存在、R8 命名、viewport、`100dvh`、B 布局媒体查询、C 布局媒体查询、`#backdrop`、触摸滑动、页数与 `svg_output` 一致、桌面关键元素未丢、体积阈值、每册唯一预览（P12，不残留同册更早日期 `.view.*.html`）。
 
 ---
 
@@ -122,6 +122,7 @@ python my-ppt-master/check_preview.py <project_path> --json   # 写 validation/p
 |---|---|---|
 | 2026-10-29 | v1.0 | 首次做成响应式：加 viewport / `100dvh` / 820px 断点 / `pointer:coarse` / 抽屉 / 滑动翻页 / 缩略图延后加载；横屏改「演示模式」（隐藏全部界面，只留左右圆键）；竖屏加操作提示 |
 | 2026-11-12 | v1.1 | 页码跳转可用性：① 底栏页码框 **Enter 直接跳页**（原先只 `blur()`，靠 change 兜底，输入值等于当前页时静默无反应）；② **点顶栏页码弹出「跳转到指定页」浮层**（手机端底栏输入框太小、顶栏页码看着像输入框但不可点）；③ 浮层在点击的同步栈内 `focus()`，满足 iOS 弹键盘要求；④ 移动端底栏输入框放大到 16px/44px 并加深蓝边框（16px 同时避免 iOS 自动缩放）；⑤ 隐藏 number 类型上下箭头。仅加事件与属性，桌面像素不变 |
+| 2026-11-23 | v1.2 | **保留日期 + 自动删旧（R8 + §21）**：`build_preview.py` 写出新版 `<册短名>.view.<YYYYMMDD>.html` 后自动删除同册更早日期的 `.view.*.html`（被 Git 跟踪时同步 `git rm`；新增 `--keep-old` 例外开关）；`check_preview.py` 新增 P12「每册唯一预览」阻断校验（支持 `--allow-multiple` 放行），旧命名 `*.preview.html` 告警顺延至 P13。模板与桌面端像素零改动 |
 
 ---
 
